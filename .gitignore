@@ -1,0 +1,115 @@
+# =============================================================================
+# Mobile App Template - Git Ignore
+# =============================================================================
+
+# =============================================================================
+# macOS
+# =============================================================================
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# =============================================================================
+# iOS / Xcode
+# =============================================================================
+ios-app/DerivedData/
+ios-app/**/xcuserdata/
+ios-app/**/*.xcworkspace/xcuserdata/
+ios-app/**/Pods/
+ios-app/**/Podfile.lock
+ios-app/**/*.pbxuser
+ios-app/**/*.mode1v3
+ios-app/**/*.mode2v3
+ios-app/**/*.perspectivev3
+ios-app/**/*.xccheckout
+ios-app/**/*.xcscmblueprint
+ios-app/**/*.moved-aside
+ios-app/**/build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Fastlane
+ios-app/fastlane/report.xml
+ios-app/fastlane/Preview.html
+ios-app/fastlane/screenshots/**/*.png
+ios-app/fastlane/test_output
+
+# =============================================================================
+# Android / Gradle
+# =============================================================================
+android-app/.gradle/
+android-app/build/
+android-app/app/build/
+android-app/local.properties
+android-app/.idea/
+android-app/*.iml
+android-app/captures/
+android-app/.externalNativeBuild/
+android-app/.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Android Studio Navigation Editor
+android-app/.navigation/
+
+# Android Studio captures folder
+android-app/captures/
+
+# Signing
+android-app/*.jks
+android-app/*.keystore
+
+# =============================================================================
+# IDE
+# =============================================================================
+# JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Cursor
+.cursor/
+
+# =============================================================================
+# Dependencies
+# =============================================================================
+node_modules/
+.npm/
+.yarn/
+
+# =============================================================================
+# Environment & Secrets
+# =============================================================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.p12
+*.mobileprovision
+
+# =============================================================================
+# Build Outputs
+# =============================================================================
+dist/
+build/
+out/
+*.log
+
+# =============================================================================
+# Testing
+# =============================================================================
+coverage/
+*.gcno
+*.gcda
+*.gcov
