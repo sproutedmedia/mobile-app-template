@@ -3,7 +3,6 @@
 
 disabled_rules:
   - trailing_whitespace
-  - line_length
 
 opt_in_rules:
   - empty_count
@@ -68,5 +67,13 @@ nesting:
     warning: 2
   function_level:
     warning: 3
+
+line_length:
+  warning: 120
+  error: 150
+  ignores_comments: true
+  ignores_urls: true
+  ignores_function_declarations: false
+  ignores_interpolated_strings: true
 
 reporter: "xcode"

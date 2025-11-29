@@ -70,6 +70,9 @@ DEFAULT_PACKAGE=$(echo "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-
 read -p "Android package name (default: $DEFAULT_PACKAGE): " PACKAGE_NAME
 PACKAGE_NAME=${PACKAGE_NAME:-$DEFAULT_PACKAGE}
 
+# Convert PROJECT_NAME to PascalCase for Android theme (handles kebab-case, snake_case, etc.)
+THEME_NAME=$(echo "$PROJECT_NAME" | sed -E 's/(^|[-_ ])([a-zA-Z])/\U\2/g' | sed 's/[^a-zA-Z0-9]//g')
+
 # Author name
 read -p "Author name (for file headers): " AUTHOR_NAME
 AUTHOR_NAME=${AUTHOR_NAME:-"Developer"}
@@ -81,6 +84,7 @@ echo ""
 print_info "Configuration:"
 echo "  Project Name: $PROJECT_NAME"
 echo "  Package Name: com.$PACKAGE_NAME"
+echo "  Theme Name: ${THEME_NAME}Theme"
 echo "  Author: $AUTHOR_NAME"
 echo "  Date: $DATE"
 echo ""
@@ -106,6 +110,7 @@ while IFS= read -r -d '' file; do
     sed_inplace \
         -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
         -e "s/{{PACKAGE_NAME}}/$PACKAGE_NAME/g" \
+        -e "s/{{THEME_NAME}}/$THEME_NAME/g" \
         -e "s/{{AUTHOR_NAME}}/$AUTHOR_NAME/g" \
         -e "s/{{DATE}}/$DATE/g" \
         "$file"

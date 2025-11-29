@@ -98,9 +98,10 @@ This project includes configuration for AI coding assistants:
 | Tool | Config |
 |------|--------|
 | Claude Code | `CLAUDE.md`, `.claude/commands/` |
-| Codex CLI | `AGENTS.md` |
 | Cursor | `.cursorrules` |
 | GitHub Copilot | `.github/copilot-instructions.md` |
+
+> **Note:** `CLAUDE.md` works with all AI assistants including Codex, Cursor, and Copilot.
 
 ### Claude Code Slash Commands
 

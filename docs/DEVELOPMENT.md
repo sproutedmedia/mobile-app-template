@@ -24,18 +24,46 @@ refactor: extract network layer
 docs: update setup guide
 ```
 
+## Pre-commit Hooks
+
+This project includes pre-commit hooks to catch issues before they reach CI.
+
+### Setup
+
+Run once after cloning:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+The hooks will automatically:
+- Run SwiftLint on staged iOS Swift files
+- Run ktlint on staged Android Kotlin files
+
+### Bypassing Hooks (Emergency Only)
+
+```bash
+git commit --no-verify -m "your message"
+```
+
 ## Code Style
 
 ### iOS (Swift)
 
 We use **SwiftLint** and **SwiftFormat** for code quality.
 
-```bash
-# Check for issues
-cd ios-app && swiftlint
+**Important:** Run tools in this order for best results:
+1. `swiftformat .` - Auto-fixes formatting issues
+2. `swiftlint` - Catches remaining style/logic issues
 
-# Auto-fix formatting
+SwiftFormat runs first because it auto-fixes many issues that SwiftLint would otherwise flag.
+
+```bash
+# Auto-fix formatting first
 cd ios-app && swiftformat .
+
+# Then check for remaining issues
+cd ios-app && swiftlint
 ```
 
 Configuration files:

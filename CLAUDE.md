@@ -1,5 +1,7 @@
 # Mobile App Template - Claude Context
 
+> **Note:** This context file works with Claude Code, Cursor, GitHub Copilot, Codex, and other AI coding assistants. The instructions and patterns documented here are universal.
+
 This is a cross-platform mobile application template for iOS and Android.
 
 ## Tech Stack

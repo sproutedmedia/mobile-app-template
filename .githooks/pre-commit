@@ -1,0 +1,60 @@
+#!/bin/bash
+# Pre-commit hook for Mobile App Template
+# Runs linting checks on staged files before commit
+
+set -e
+
+echo "Running pre-commit checks..."
+
+# Check if iOS files are staged
+if git diff --cached --name-only | grep -q "^ios-app/"; then
+    echo ""
+    echo "=== iOS: Running SwiftLint ==="
+
+    # Check if swiftlint is installed
+    if command -v swiftlint &> /dev/null; then
+        cd ios-app
+
+        # Run swiftlint only on staged Swift files
+        STAGED_SWIFT_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep "^ios-app/.*\.swift$" | sed 's|^ios-app/||' || true)
+
+        if [ -n "$STAGED_SWIFT_FILES" ]; then
+            echo "$STAGED_SWIFT_FILES" | while read file; do
+                if [ -f "$file" ]; then
+                    swiftlint lint --path "$file" --strict --quiet
+                fi
+            done
+            echo "iOS lint check passed"
+        fi
+
+        cd ..
+    else
+        echo "Warning: swiftlint not installed. Skipping iOS lint check."
+        echo "Install with: brew install swiftlint"
+    fi
+fi
+
+# Check if Android files are staged
+if git diff --cached --name-only | grep -q "^android-app/"; then
+    echo ""
+    echo "=== Android: Running ktlint ==="
+
+    cd android-app
+
+    # Check if gradlew exists and is executable
+    if [ -x "./gradlew" ]; then
+        # Run ktlint check
+        ./gradlew ktlintCheck --quiet 2>/dev/null || {
+            echo "Android ktlint check failed. Run './gradlew ktlintFormat' to auto-fix."
+            exit 1
+        }
+        echo "Android lint check passed"
+    else
+        echo "Warning: gradlew not found or not executable. Skipping Android lint check."
+    fi
+
+    cd ..
+fi
+
+echo ""
+echo "Pre-commit checks passed!"

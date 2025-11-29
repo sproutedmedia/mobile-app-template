@@ -100,15 +100,14 @@ fi
 
 print_info "Checking environment variables..."
 
+# Track what needs to be added
+NEEDS_ANDROID_HOME=false
+NEEDS_JAVA_HOME=false
+
 # Check ANDROID_HOME
 if [ -z "$ANDROID_HOME" ]; then
     print_warning "ANDROID_HOME not set"
-    echo ""
-    echo "Add to $SHELL_RC:"
-    echo '  export ANDROID_HOME=$HOME/Library/Android/sdk'
-    echo '  export PATH=$PATH:$ANDROID_HOME/emulator'
-    echo '  export PATH=$PATH:$ANDROID_HOME/platform-tools'
-    echo ""
+    NEEDS_ANDROID_HOME=true
 else
     print_success "ANDROID_HOME is set: $ANDROID_HOME"
 fi
@@ -116,12 +115,49 @@ fi
 # Check JAVA_HOME
 if [ -z "$JAVA_HOME" ]; then
     print_warning "JAVA_HOME not set"
-    echo ""
-    echo "Add to $SHELL_RC:"
-    echo '  export JAVA_HOME=$(/usr/libexec/java_home 2>/dev/null || echo "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home")'
-    echo ""
+    NEEDS_JAVA_HOME=true
 else
     print_success "JAVA_HOME is set: $JAVA_HOME"
+fi
+
+# Offer to add environment variables automatically
+if [ "$NEEDS_ANDROID_HOME" = true ] || [ "$NEEDS_JAVA_HOME" = true ]; then
+    echo ""
+    read -p "Would you like to add missing environment variables to $SHELL_RC? (y/n) " -n 1 -r
+    echo ""
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "" >> "$SHELL_RC"
+        echo "# Android Development Environment (added by install-android-tools.sh)" >> "$SHELL_RC"
+
+        if [ "$NEEDS_ANDROID_HOME" = true ]; then
+            echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> "$SHELL_RC"
+            echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> "$SHELL_RC"
+            echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> "$SHELL_RC"
+            print_success "Added ANDROID_HOME to $SHELL_RC"
+        fi
+
+        if [ "$NEEDS_JAVA_HOME" = true ]; then
+            echo 'export JAVA_HOME=$(/usr/libexec/java_home 2>/dev/null || echo "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home")' >> "$SHELL_RC"
+            print_success "Added JAVA_HOME to $SHELL_RC"
+        fi
+
+        echo ""
+        print_info "Environment variables added. Run 'source $SHELL_RC' or restart your terminal."
+    else
+        echo ""
+        echo "To manually add the variables, add these lines to $SHELL_RC:"
+        echo ""
+        if [ "$NEEDS_ANDROID_HOME" = true ]; then
+            echo '  export ANDROID_HOME=$HOME/Library/Android/sdk'
+            echo '  export PATH=$PATH:$ANDROID_HOME/emulator'
+            echo '  export PATH=$PATH:$ANDROID_HOME/platform-tools'
+        fi
+        if [ "$NEEDS_JAVA_HOME" = true ]; then
+            echo '  export JAVA_HOME=$(/usr/libexec/java_home 2>/dev/null || echo "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home")'
+        fi
+        echo ""
+    fi
 fi
 
 # =============================================================================
