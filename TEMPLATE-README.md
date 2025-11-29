@@ -93,6 +93,29 @@ The following placeholders are replaced by `setup.sh`:
 - Android Studio (for Android)
 - JDK 17
 
+## Claude Code Integration
+
+This template includes Claude Code features for AI-assisted development:
+
+### Slash Commands
+
+| Command | Description |
+|---------|-------------|
+| `/lint` | Run all linting checks (iOS + Android) |
+| `/format` | Auto-format all code |
+| `/build` | Build both platforms |
+| `/test` | Run all tests |
+| `/check-env` | Verify development environment |
+| `/new-screen` | Generate a new screen with MVVM structure |
+
+### Project Context
+
+The `CLAUDE.md` file provides Claude with project context, architecture details, and common commands.
+
+### Session Start Hook
+
+When starting a Claude Code session, the development environment is automatically verified.
+
 ## Customization
 
 Feel free to modify this template:
@@ -101,6 +124,7 @@ Feel free to modify this template:
 - Customize linter configurations
 - Add CI/CD templates (.github/workflows/)
 - Add more documentation templates
+- Add custom slash commands in `.claude/commands/`
 
 ## License
 
