@@ -50,28 +50,42 @@ This will:
 ```
 mobile-app-template/
 ├── ios-app/
-│   ├── {{PROJECT_NAME}}/        # Renamed during setup
-│   │   ├── App/
-│   │   └── Views/
+│   ├── {{PROJECT_NAME}}/        # Source code (renamed during setup)
+│   │   ├── App/                 # App entry point
+│   │   ├── Views/               # SwiftUI views
+│   │   ├── ViewModels/          # View models (created during setup)
+│   │   ├── Models/              # Data models (created during setup)
+│   │   ├── Services/            # Business logic (created during setup)
+│   │   └── Utilities/           # Helpers (created during setup)
+│   ├── {{PROJECT_NAME}}Tests/   # Unit tests
 │   ├── .swiftlint.yml
 │   └── .swiftformat
 ├── android-app/
-│   ├── app/
-│   │   └── src/main/java/com/{{PACKAGE_NAME}}/
+│   ├── app/src/
+│   │   ├── main/java/com/{{PACKAGE_NAME}}/
+│   │   │   ├── ui/              # Compose screens, components, theme
+│   │   │   ├── data/            # Data layer (created during setup)
+│   │   │   └── domain/          # Business logic (created during setup)
+│   │   └── test/                # Unit tests
 │   ├── config/detekt/
-│   ├── gradle/
-│   └── build.gradle.kts
+│   └── gradle/
 ├── scripts/
 │   ├── install-ios-tools.sh
 │   ├── install-android-tools.sh
 │   └── verify-dev-environment.sh
+├── .github/
+│   ├── workflows/               # CI/CD pipelines
+│   ├── copilot-instructions.md  # GitHub Copilot config
+│   └── PULL_REQUEST_TEMPLATE.md
+├── .claude/                     # Claude Code config
+│   ├── commands/                # Slash commands
+│   └── settings.json            # Session hooks
 ├── docs/
-│   ├── SETUP.md
-│   └── DEVELOPMENT.md
 ├── setup.sh                     # Template customization script
-├── README.md                    # Project readme (customized)
-├── TEMPLATE-README.md           # This file (deleted after setup)
-└── .gitignore
+├── CLAUDE.md                    # Claude Code context
+├── AGENTS.md                    # Codex CLI context
+├── .cursorrules                 # Cursor rules
+└── README.md
 ```
 
 ## Placeholders
