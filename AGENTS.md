@@ -77,6 +77,17 @@ cd android-app && ./gradlew check          # All checks
 - **Android**: Follow ktlint conventions, pass detekt static analysis
 - **Both**: Use MVVM pattern, keep views/screens thin, business logic in ViewModels
 
+## Claude Code Slash Commands
+
+If using Claude Code, these slash commands are available:
+
+- `/lint` - Run all linting checks (iOS + Android)
+- `/format` - Auto-format all code
+- `/build` - Build both platforms
+- `/test` - Run all tests
+- `/check-env` - Verify development environment
+- `/new-screen` - Generate a new screen with proper MVVM structure
+
 ## Important Notes
 
 - This is a **template** - placeholders like `{{PROJECT_NAME}}` are replaced by `setup.sh`

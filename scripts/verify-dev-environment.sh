@@ -2,6 +2,7 @@
 # =============================================================================
 # Development Environment Verification Script
 # Checks all required and optional tools for mobile development
+# Supports: macOS (full), Linux (Android only), Windows WSL (Android only)
 # =============================================================================
 
 # Colors
@@ -15,6 +16,18 @@ REQUIRED_PASS=0
 REQUIRED_FAIL=0
 OPTIONAL_PASS=0
 OPTIONAL_FAIL=0
+
+# Detect OS
+detect_os() {
+    case "$(uname -s)" in
+        Darwin*)  OS="macos" ;;
+        Linux*)   OS="linux" ;;
+        MINGW*|MSYS*|CYGWIN*) OS="windows" ;;
+        *)        OS="unknown" ;;
+    esac
+}
+
+detect_os
 
 print_header() {
     echo -e "\n${BLUE}═══════════════════════════════════════════════════════════════${NC}"
@@ -68,22 +81,33 @@ check_env() {
 print_header "🔧 Core Development Tools"
 # =============================================================================
 
-check_required "Homebrew" "command -v brew" "brew --version"
 check_required "Git" "command -v git" "git --version"
-check_required "Node.js" "command -v node" "node --version"
+
+if [ "$OS" = "macos" ]; then
+    check_required "Homebrew" "command -v brew" "brew --version"
+else
+    check_optional "Homebrew" "command -v brew" "brew --version"
+fi
+
+check_optional "Node.js" "command -v node" "node --version"
 check_optional "npm" "command -v npm" "npm --version"
 
 # =============================================================================
 print_header "🍎 iOS Development"
 # =============================================================================
 
-check_required "Xcode CLI Tools" "xcode-select -p" "xcode-select --version"
-check_required "SwiftLint" "command -v swiftlint" "swiftlint version"
-check_required "SwiftFormat" "command -v swiftformat" "swiftformat --version"
-check_optional "Fastlane" "command -v fastlane" "fastlane --version"
-check_optional "CocoaPods" "command -v pod" "pod --version"
-check_optional "xcbeautify" "command -v xcbeautify" "xcbeautify --version"
-check_optional "xcodes" "command -v xcodes" "xcodes version"
+if [ "$OS" = "macos" ]; then
+    check_required "Xcode CLI Tools" "xcode-select -p" "xcode-select --version"
+    check_required "SwiftLint" "command -v swiftlint" "swiftlint version"
+    check_required "SwiftFormat" "command -v swiftformat" "swiftformat --version"
+    check_optional "Fastlane" "command -v fastlane" "fastlane --version"
+    check_optional "CocoaPods" "command -v pod" "pod --version"
+    check_optional "xcbeautify" "command -v xcbeautify" "xcbeautify --version"
+    check_optional "xcodes" "command -v xcodes" "xcodes version"
+else
+    echo -e "  ${YELLOW}⚠️  iOS development requires macOS${NC}"
+    echo -e "  ${YELLOW}   Skipping iOS tool checks on $OS${NC}"
+fi
 
 # =============================================================================
 print_header "🤖 Android Development"

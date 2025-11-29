@@ -127,6 +127,8 @@ cd android-app
 
 ### iOS
 
+Test files location: `ios-app/{{PROJECT_NAME}}Tests/`
+
 ```bash
 # Run unit tests
 xcodebuild test -scheme {{PROJECT_NAME}} -destination 'platform=iOS Simulator,name=iPhone 15'
@@ -136,6 +138,8 @@ xcodebuild test -scheme {{PROJECT_NAME}} -destination 'platform=iOS Simulator,na
 ```
 
 ### Android
+
+Test files location: `android-app/app/src/test/java/com/{{PACKAGE_NAME}}/`
 
 ```bash
 cd android-app
@@ -170,7 +174,16 @@ scrcpy --record file.mp4  # Record screen
 
 ## CI/CD
 
-### Recommended Setup
+### GitHub Actions
+
+This project includes GitHub Actions workflows in `.github/workflows/`:
+
+- **android.yml** - Runs ktlint, detekt, tests, and builds APK on push/PR
+- **ios.yml** - Runs SwiftLint, SwiftFormat, tests, and builds on push/PR
+
+Workflows run automatically when changes are pushed to relevant paths.
+
+### Recommended Release Setup
 
 **iOS:**
 - Fastlane for automation
