@@ -91,10 +91,24 @@ cd android-app
 ./gradlew detekt
 ```
 
+## Claude Code Commands
+
+This project includes slash commands for Claude Code:
+
+```
+/lint        - Run all linting checks
+/format      - Auto-format all code
+/build       - Build both platforms
+/test        - Run all tests
+/check-env   - Verify development environment
+/new-screen  - Generate a new screen
+```
+
 ## Documentation
 
 - [Setup Guide](docs/SETUP.md) - Detailed environment setup
 - [Development Guide](docs/DEVELOPMENT.md) - Development workflow and best practices
+- [CLAUDE.md](CLAUDE.md) - Project context for Claude Code
 
 ## License
 
