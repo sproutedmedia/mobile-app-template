@@ -88,6 +88,8 @@ This project includes Claude Code slash commands for common tasks:
 - `/check-env` - Verify development environment
 - `/new-screen` - Generate a new screen with proper structure
 
+See `docs/AI-ASSISTANTS.md` for side-by-side guidance that also applies when developers use Codex or similar tools.
+
 ## Important Notes
 
 - This is a **template** - placeholders like `{{PROJECT_NAME}}` are replaced by `setup.sh`

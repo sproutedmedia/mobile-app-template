@@ -109,6 +109,7 @@ This project includes slash commands for Claude Code:
 - [Setup Guide](docs/SETUP.md) - Detailed environment setup
 - [Development Guide](docs/DEVELOPMENT.md) - Development workflow and best practices
 - [CLAUDE.md](CLAUDE.md) - Project context for Claude Code
+- [AI Assistant Guide](docs/AI-ASSISTANTS.md) - Tips for using Claude Code or Codex effectively with this template
 
 ## License
 
