@@ -91,9 +91,18 @@ cd android-app
 ./gradlew detekt
 ```
 
-## Claude Code Commands
+## AI Assistant Support
 
-This project includes slash commands for Claude Code:
+This project includes configuration for AI coding assistants:
+
+| Tool | Config |
+|------|--------|
+| Claude Code | `CLAUDE.md`, `.claude/commands/` |
+| Codex CLI | `AGENTS.md` |
+| Cursor | `.cursorrules` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+
+### Claude Code Slash Commands
 
 ```
 /lint        - Run all linting checks
@@ -108,8 +117,7 @@ This project includes slash commands for Claude Code:
 
 - [Setup Guide](docs/SETUP.md) - Detailed environment setup
 - [Development Guide](docs/DEVELOPMENT.md) - Development workflow and best practices
-- [CLAUDE.md](CLAUDE.md) - Project context for Claude Code
-- [AI Assistant Guide](docs/AI-ASSISTANTS.md) - Tips for using Claude Code or Codex effectively with this template
+- [AI Assistant Guide](docs/AI-ASSISTANTS.md) - Playbooks for AI-assisted development
 
 ## License
 

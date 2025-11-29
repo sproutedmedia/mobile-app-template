@@ -93,11 +93,18 @@ The following placeholders are replaced by `setup.sh`:
 - Android Studio (for Android)
 - JDK 17
 
-## Claude Code Integration
+## AI Assistant Integration
 
-This template includes Claude Code features for AI-assisted development:
+This template includes configuration for multiple AI coding assistants:
 
-### Slash Commands
+| Tool | Config File | Description |
+|------|-------------|-------------|
+| **Claude Code** | `CLAUDE.md`, `.claude/` | Project context, slash commands, session hooks |
+| **Codex CLI** | `AGENTS.md` | Project context for OpenAI Codex |
+| **Cursor** | `.cursorrules` | Project rules and code style guidelines |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | Code generation instructions |
+
+### Claude Code Slash Commands
 
 | Command | Description |
 |---------|-------------|
@@ -108,13 +115,9 @@ This template includes Claude Code features for AI-assisted development:
 | `/check-env` | Verify development environment |
 | `/new-screen` | Generate a new screen with MVVM structure |
 
-### Project Context
+### Workflow Playbooks
 
-The `CLAUDE.md` file provides Claude with project context, architecture details, and common commands.
-
-### Session Start Hook
-
-When starting a Claude Code session, the development environment is automatically verified.
+See `docs/AI-ASSISTANTS.md` for detailed playbooks that work across all AI assistants.
 
 ## Customization
 
