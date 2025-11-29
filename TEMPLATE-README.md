@@ -11,13 +11,20 @@ A reusable template for cross-platform iOS and Android mobile applications.
 
 ## Usage
 
-### 1. Clone or Copy This Template
+### 1. Create Your Project from Template
 
 ```bash
-# Option A: Clone from GitHub (if hosted as template repo)
-gh repo create my-new-app --template your-username/mobile-app-template
+# Create a new repo from this template (recommended)
+gh repo create my-new-app --template sproutedmedia/mobile-app-template --private --clone
+cd my-new-app
 
-# Option B: Copy the directory
+# Or for a public repo:
+gh repo create my-new-app --template sproutedmedia/mobile-app-template --public --clone
+cd my-new-app
+```
+
+**Alternative:** Copy the directory manually:
+```bash
 cp -r mobile-app-template ~/projects/my-new-app
 cd ~/projects/my-new-app
 ```
@@ -82,8 +89,7 @@ mobile-app-template/
 │   └── settings.json            # Session hooks
 ├── docs/
 ├── setup.sh                     # Template customization script
-├── CLAUDE.md                    # Claude Code context
-├── AGENTS.md                    # Codex CLI context
+├── CLAUDE.md                    # AI assistant context (works with all)
 ├── .cursorrules                 # Cursor rules
 └── README.md
 ```
@@ -96,6 +102,7 @@ The following placeholders are replaced by `setup.sh`:
 |-------------|-------------|---------|
 | `{{PROJECT_NAME}}` | Project/app name | `MyAwesomeApp` |
 | `{{PACKAGE_NAME}}` | Android package | `myawesomeapp` |
+| `{{THEME_NAME}}` | Android theme (PascalCase) | `MyAwesomeApp` |
 | `{{AUTHOR_NAME}}` | Developer name | `John Doe` |
 | `{{DATE}}` | Setup date | `2024-01-15` |
 
@@ -114,9 +121,10 @@ This template includes configuration for multiple AI coding assistants:
 | Tool | Config File | Description |
 |------|-------------|-------------|
 | **Claude Code** | `CLAUDE.md`, `.claude/` | Project context, slash commands, session hooks |
-| **Codex CLI** | `AGENTS.md` | Project context for OpenAI Codex |
 | **Cursor** | `.cursorrules` | Project rules and code style guidelines |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | Code generation instructions |
+
+> **Note:** `CLAUDE.md` works with all AI assistants including Codex, Cursor, and Copilot.
 
 ### Claude Code Slash Commands
 
