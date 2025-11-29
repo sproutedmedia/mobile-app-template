@@ -70,7 +70,7 @@ This installs:
 
 #### Environment Variables
 
-Add these to your `~/.zshrc`:
+The install script will offer to add these automatically. If you prefer manual setup, add to `~/.zshrc`:
 
 ```bash
 # Android
