@@ -1,0 +1,65 @@
+# Mobile App Template - Cursor Rules
+
+You are working on a cross-platform mobile application template for iOS and Android.
+
+## Tech Stack
+
+- iOS: SwiftUI with Swift 5.9+, MVVM architecture
+- Android: Jetpack Compose with Kotlin 2.0+, MVVM architecture
+
+## Project Structure
+
+- `ios-app/` - iOS application (SwiftUI)
+  - `{{PROJECT_NAME}}/Views/` - SwiftUI views
+  - `{{PROJECT_NAME}}/ViewModels/` - View models
+  - `{{PROJECT_NAME}}/Models/` - Data models
+  - `{{PROJECT_NAME}}/Services/` - Business logic, API
+- `android-app/` - Android application (Jetpack Compose)
+  - `app/src/main/java/com/{{PACKAGE_NAME}}/ui/screens/` - Compose screens
+  - `app/src/main/java/com/{{PACKAGE_NAME}}/ui/components/` - Reusable components
+  - `app/src/main/java/com/{{PACKAGE_NAME}}/data/` - Data layer
+  - `app/src/main/java/com/{{PACKAGE_NAME}}/domain/` - Business logic
+
+## Code Style Rules
+
+### iOS (Swift)
+- Follow SwiftLint rules in `ios-app/.swiftlint.yml`
+- Format with SwiftFormat using `ios-app/.swiftformat` config
+- Use `@MainActor` for view models
+- Prefer `@StateObject` for owned state, `@ObservedObject` for passed state
+- Use Swift concurrency (async/await) for asynchronous operations
+
+### Android (Kotlin)
+- Follow ktlint conventions
+- Pass detekt static analysis (`android-app/config/detekt/detekt.yml`)
+- Use Compose state hoisting - state up, events down
+- Prefer `StateFlow` over `LiveData` for reactive state
+- Use `viewModelScope` for coroutines in ViewModels
+
+## Architecture Guidelines
+
+- Use MVVM pattern on both platforms
+- Keep views/screens thin - no business logic
+- ViewModels handle state and business logic
+- Use repository pattern for data access
+- Models should be simple data classes
+
+## Commands to Run
+
+Before committing, ensure code quality:
+
+```bash
+# iOS
+cd ios-app && swiftformat . && swiftlint
+
+# Android
+cd android-app && ./gradlew ktlintFormat && ./gradlew ktlintCheck && ./gradlew detekt
+```
+
+## Template Notes
+
+This is a template repository. Placeholders like `{{PROJECT_NAME}}` and `{{PACKAGE_NAME}}` are replaced when running `./setup.sh`.
+
+## Additional Context
+
+See `CLAUDE.md` for detailed project context and `docs/AI-ASSISTANTS.md` for workflow playbooks.
