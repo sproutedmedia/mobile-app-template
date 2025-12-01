@@ -126,6 +126,11 @@ if [ -d "ios-app/{{PROJECT_NAME}}" ]; then
     print_success "iOS app directory renamed"
 fi
 
+if [ -d "ios-app/{{PROJECT_NAME}}Tests" ]; then
+    mv "ios-app/{{PROJECT_NAME}}Tests" "ios-app/${PROJECT_NAME}Tests"
+    print_success "iOS tests directory renamed"
+fi
+
 # Rename Android package directories
 print_info "Renaming Android package directories..."
 
@@ -133,6 +138,12 @@ ANDROID_SRC="android-app/app/src/main/java/com"
 if [ -d "$ANDROID_SRC/{{PACKAGE_NAME}}" ]; then
     mv "$ANDROID_SRC/{{PACKAGE_NAME}}" "$ANDROID_SRC/$PACKAGE_NAME"
     print_success "Android package directory renamed"
+fi
+
+ANDROID_TEST="android-app/app/src/test/java/com"
+if [ -d "$ANDROID_TEST/{{PACKAGE_NAME}}" ]; then
+    mv "$ANDROID_TEST/{{PACKAGE_NAME}}" "$ANDROID_TEST/$PACKAGE_NAME"
+    print_success "Android test package directory renamed"
 fi
 
 # Create iOS MVVM directory structure
