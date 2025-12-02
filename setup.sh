@@ -77,6 +77,10 @@ THEME_NAME=$(echo "$PROJECT_NAME" | sed -E 's/(^|[-_ ])([a-zA-Z])/\U\2/g' | sed 
 read -p "Author name (for file headers): " AUTHOR_NAME
 AUTHOR_NAME=${AUTHOR_NAME:-"Developer"}
 
+# GitHub owner (for issue template links)
+read -p "GitHub username or org (for repo links): " GITHUB_OWNER
+GITHUB_OWNER=${GITHUB_OWNER:-"OWNER"}
+
 # Current date
 DATE=$(date +"%Y-%m-%d")
 
@@ -86,6 +90,7 @@ echo "  Project Name: $PROJECT_NAME"
 echo "  Package Name: com.$PACKAGE_NAME"
 echo "  Theme Name: ${THEME_NAME}Theme"
 echo "  Author: $AUTHOR_NAME"
+echo "  GitHub Owner: $GITHUB_OWNER"
 echo "  Date: $DATE"
 echo ""
 
@@ -112,6 +117,7 @@ while IFS= read -r -d '' file; do
         -e "s/{{PACKAGE_NAME}}/$PACKAGE_NAME/g" \
         -e "s/{{THEME_NAME}}/$THEME_NAME/g" \
         -e "s/{{AUTHOR_NAME}}/$AUTHOR_NAME/g" \
+        -e "s/{{GITHUB_OWNER}}/$GITHUB_OWNER/g" \
         -e "s/{{DATE}}/$DATE/g" \
         "$file"
 done < <(find . -type f \( -name "*.swift" -o -name "*.kt" -o -name "*.xml" -o -name "*.gradle.kts" -o -name "*.toml" -o -name "*.yml" -o -name "*.md" -o -name "*.sh" -o -name ".swiftformat" -o -name ".swiftlint.yml" -o -name ".cursorrules" -o -name "*.json" \) -print0)
@@ -693,6 +699,11 @@ Your project "$PROJECT_NAME" is ready!
   - README.md           - Project overview
   - docs/SETUP.md       - Detailed setup guide
   - docs/DEVELOPMENT.md - Development workflow
+
+📋 GitHub Issue Templates:
+  Your project includes issue templates for bugs, features, and tasks.
+  To customize them further (remove backend option, add platforms, etc.):
+     ./scripts/customize-issue-templates.sh
 
 Happy coding! 🚀
 

@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Documentation
-    url: https://github.com/OWNER/REPO/blob/main/docs/
+    url: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/blob/main/docs/
     about: Check the documentation before opening an issue
