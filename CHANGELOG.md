@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-12-01
+
+### Added
+
+- **GitHub Issue Templates** - Pre-configured templates for streamlined issue tracking
+  - `bug_report.md` - Bug reports with platform, severity, and reproduction steps
+  - `feature_request.md` - Feature requests with acceptance criteria
+  - `task.md` - Task tracking with dependencies
+  - `config.yml` - Disables blank issues, links to documentation
+
+- **Issue Template Customization Script** - `scripts/customize-issue-templates.sh`
+  - Remove "Backend API" platform option for frontend-only projects
+  - Add "Web App" platform option for cross-platform projects
+  - Configure default labels (adds `needs-triage` to bug reports)
+
+- **New Placeholder** - `{{GITHUB_OWNER}}` for GitHub username/org in issue template links
+
+### Changed
+
+- **Setup Script** - Now prompts for GitHub username/org to configure issue template documentation links
+
 ## [1.1.1] - 2025-11-30
 
 ### Fixed
@@ -98,8 +119,10 @@ The following placeholders are replaced by `setup.sh`:
 - `{{PROJECT_NAME}}` - Project/app name
 - `{{PACKAGE_NAME}}` - Android package name
 - `{{AUTHOR_NAME}}` - Developer name
+- `{{GITHUB_OWNER}}` - GitHub username/org
 - `{{DATE}}` - Setup date
 
+[1.2.0]: https://github.com/sproutedmedia/mobile-app-template/releases/tag/v1.2.0
 [1.1.1]: https://github.com/sproutedmedia/mobile-app-template/releases/tag/v1.1.1
 [1.1.0]: https://github.com/sproutedmedia/mobile-app-template/releases/tag/v1.1.0
 [1.0.0]: https://github.com/sproutedmedia/mobile-app-template/releases/tag/v1.0.0
