@@ -1,0 +1,36 @@
+# Pre-commit hooks for mobile app development
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Gitleaks - Secret detection
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: detect-private-key
+
+  # Kotlin/Android (if ktlint is installed)
+  # Uncomment to enable:
+  # - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  #   rev: v2.12.0
+  #   hooks:
+  #     - id: pretty-format-kotlin
+  #       args: [--autofix]
+
+# Note: Swift/iOS linting is typically handled by SwiftLint in Xcode
+# Add SwiftLint as a run script build phase in your Xcode project
+

@@ -1,0 +1,28 @@
+# Gitleaks configuration
+# https://github.com/gitleaks/gitleaks
+
+title = "Mobile App Template Gitleaks Config"
+
+# Extend the default rules
+[extend]
+useDefault = true
+
+# Allow specific patterns (false positives)
+[allowlist]
+description = "Allowlisted patterns"
+paths = [
+    '''.gitleaks.toml$''',
+    '''.pre-commit-config.yaml$''',
+    '''.env.example$''',
+    '''.env.tpl$''',
+    '''env-template.tpl$''',
+    '''gradle-wrapper.properties$''',
+]
+
+# Example patterns that might appear in placeholder code
+regexes = [
+    '''YOUR_API_KEY_HERE''',
+    '''PASTE_.*_HERE''',
+    '''REPLACE_WITH_.*''',
+]
+

@@ -1,9 +1,14 @@
 {
   "hooks": {
-    "session-start": [
+    "SessionStart": [
       {
-        "type": "command",
-        "command": "./scripts/verify-dev-environment.sh 2>/dev/null | grep -E '(PASS|FAIL|Missing)' | head -10"
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/verify-dev-environment.sh 2>/dev/null | grep -E '(PASS|FAIL|Missing)' | head -10"
+          }
+        ]
       }
     ]
   }

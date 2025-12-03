@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "session-start": [
+      {
+        "type": "command",
+        "command": "./scripts/verify-dev-environment.sh 2>/dev/null | grep -E '(PASS|FAIL|Missing)' | head -10"
+      }
+    ]
+  }
+}

@@ -657,9 +657,28 @@ if [ ! -d ".git" ]; then
         git add .
         git commit -m "Initial commit from mobile-app-template"
         print_success "Git repository initialized"
+
+        # Install pre-commit hooks if pre-commit is available
+        if command -v pre-commit &> /dev/null; then
+            print_info "Installing pre-commit hooks (gitleaks for secret detection)..."
+            pre-commit install
+            print_success "Pre-commit hooks installed"
+        else
+            print_info "💡 Install pre-commit for automatic secret scanning:"
+            echo "     brew install pre-commit && pre-commit install"
+        fi
     fi
 else
     print_info "Git repository already exists"
+    # Still offer to install pre-commit hooks
+    if command -v pre-commit &> /dev/null && [ ! -f ".git/hooks/pre-commit" ]; then
+        read -p "Install pre-commit hooks? (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            pre-commit install
+            print_success "Pre-commit hooks installed"
+        fi
+    fi
 fi
 
 # =============================================================================

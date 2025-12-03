@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(/usr/bin/find:*)",
+      "Bash(/usr/bin/grep:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(chmod:*)",
+      "Bash(./scripts/customize-issue-templates.sh:*)",
+      "Bash(git checkout:*)",
+      "Bash(claude doctor)",
+      "Bash(echo:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
