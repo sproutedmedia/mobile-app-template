@@ -17,6 +17,18 @@ Run the verification script to check your environment:
 ./scripts/verify-dev-environment.sh
 ```
 
+### First-Time Setup (After Cloning)
+
+```bash
+# Install pre-commit hooks (required for secret scanning)
+pre-commit install
+
+# If pre-commit isn't installed:
+# brew install pre-commit && pre-commit install
+```
+
+> ⚠️ **Important**: The `.pre-commit-config.yaml` file defines *what* hooks run, but you must run `pre-commit install` to *activate* them locally. This is per-machine, not committed to git.
+
 ### Install Development Tools
 
 ```bash
