@@ -1,0 +1,29 @@
+# =============================================================================
+# {{PROJECT_NAME}} iOS Appfile
+# =============================================================================
+# This file contains app-specific configuration for fastlane.
+# Update these values after running setup.sh
+# =============================================================================
+
+# App identifier (Bundle ID)
+# Example: com.yourcompany.appname
+app_identifier("com.{{PACKAGE_NAME}}.app")
+
+# Apple Developer Portal email
+# Leave commented to use App Store Connect API key instead
+# apple_id("your@email.com")
+
+# Apple Developer Team ID
+# Find at: https://developer.apple.com/account/#/membership/
+# Leave commented if you only have one team
+# team_id("TEAM_ID")
+
+# App Store Connect Team ID (if different from Developer Team)
+# itc_team_id("ITC_TEAM_ID")
+
+# =============================================================================
+# Per-lane overrides (optional)
+# =============================================================================
+# for_lane :beta do
+#   app_identifier("com.{{PACKAGE_NAME}}.app.beta")
+# end

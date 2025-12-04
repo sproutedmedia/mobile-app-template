@@ -1,0 +1,178 @@
+# =============================================================================
+# {{PROJECT_NAME}} iOS Fastfile
+# =============================================================================
+# Run with: bundle exec fastlane [lane]
+#
+# Lanes:
+#   beta    - Build and upload to TestFlight
+#   release - Build and submit to App Store
+#   build   - Build only (no upload)
+#   bump    - Update version/build numbers
+#
+# Usage with workspace fastlane-release script:
+#   fastlane-release beta
+#   fastlane-release release
+# =============================================================================
+
+default_platform(:ios)
+
+# App Store Connect API authentication
+# Credentials come from environment variables (set by fastlane-release script)
+def api_key
+  app_store_connect_api_key(
+    key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
+    issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+    key_filepath: ENV["APP_STORE_CONNECT_API_KEY_KEY_FILEPATH"],
+    in_house: false
+  )
+end
+
+platform :ios do
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Before all lanes
+  # ─────────────────────────────────────────────────────────────────────────────
+  before_all do
+    # Ensure we're on latest code
+    ensure_git_status_clean unless ENV["SKIP_GIT_CHECK"]
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Beta: Build and upload to TestFlight
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Build and upload to TestFlight"
+  lane :beta do |options|
+    # Bump version/build if specified
+    if options[:version] || options[:build]
+      bump(options)
+    else
+      increment_build_number
+    end
+
+    # Build the app
+    build_app(
+      scheme: "{{PROJECT_NAME}}",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "{{PROJECT_NAME}}.ipa"
+    )
+
+    # Upload to TestFlight
+    changelog = ENV["FASTLANE_CHANGELOG"] || "Bug fixes and improvements"
+
+    upload_to_testflight(
+      api_key: api_key,
+      changelog: changelog,
+      distribute_external: false,
+      notify_external_testers: false
+    )
+
+    # Clean up build artifacts
+    clean_build_artifacts
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Release: Build and submit to App Store
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Build and submit to App Store"
+  lane :release do |options|
+    # Version is required for release
+    unless options[:version]
+      UI.user_error!("Version number is required for release. Use: fastlane release version:X.Y.Z")
+    end
+
+    bump(options)
+
+    # Build the app
+    build_app(
+      scheme: "{{PROJECT_NAME}}",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "{{PROJECT_NAME}}.ipa"
+    )
+
+    # Submit to App Store
+    release_notes = ENV["FASTLANE_CHANGELOG"] || "New features and improvements"
+
+    upload_to_app_store(
+      api_key: api_key,
+      submit_for_review: false,  # Set to true to auto-submit
+      automatic_release: false,  # Set to true for auto-release after approval
+      force: true,               # Skip HTML report verification
+      release_notes: {
+        "en-US" => release_notes
+      },
+      precheck_include_in_app_purchases: false
+    )
+
+    clean_build_artifacts
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Build: Build only, no upload
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Build the app without uploading"
+  lane :build do |options|
+    if options[:version] || options[:build]
+      bump(options)
+    end
+
+    build_app(
+      scheme: "{{PROJECT_NAME}}",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "{{PROJECT_NAME}}.ipa"
+    )
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Bump: Update version and/or build numbers
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Update version and build numbers"
+  lane :bump do |options|
+    if options[:version]
+      increment_version_number(
+        version_number: options[:version]
+      )
+      UI.success("Version set to #{options[:version]}")
+    end
+
+    if options[:build]
+      increment_build_number(
+        build_number: options[:build]
+      )
+      UI.success("Build number set to #{options[:build]}")
+    elsif !options[:build] && !options[:version]
+      # If no specific build number, auto-increment
+      increment_build_number
+      build_number = get_build_number
+      UI.success("Build number incremented to #{build_number}")
+    end
+
+    # Commit version bump
+    commit_version_bump(
+      message: "Bump version to #{get_version_number} (#{get_build_number})",
+      xcodeproj: "{{PROJECT_NAME}}.xcodeproj",
+      force: true
+    ) unless ENV["SKIP_GIT_COMMIT"]
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Tests: Run unit tests
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Run all tests"
+  lane :test do
+    run_tests(
+      scheme: "{{PROJECT_NAME}}",
+      devices: ["iPhone 15"],
+      clean: true
+    )
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Error handling
+  # ─────────────────────────────────────────────────────────────────────────────
+  error do |lane, exception|
+    UI.error("Lane #{lane} failed with: #{exception.message}")
+    clean_build_artifacts
+  end
+end

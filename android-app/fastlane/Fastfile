@@ -1,0 +1,178 @@
+# =============================================================================
+# {{PROJECT_NAME}} Android Fastfile
+# =============================================================================
+# Run with: bundle exec fastlane [lane]
+#
+# Lanes:
+#   beta    - Build and upload to Play Console (internal track)
+#   release - Build and submit to Play Console (production)
+#   build   - Build only (no upload)
+#   bump    - Update version code/name
+#
+# Prerequisites:
+#   - Google Play Console Service Account JSON (stored in 1Password)
+#   - Keystore for signing (stored in 1Password or local)
+# =============================================================================
+
+default_platform(:android)
+
+# Play Console API authentication
+# Service account JSON is fetched from 1Password by fastlane-release script
+def play_credentials
+  ENV["GOOGLE_PLAY_JSON_KEY_FILE"] || "play-store-credentials.json"
+end
+
+platform :android do
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Before all lanes
+  # ─────────────────────────────────────────────────────────────────────────────
+  before_all do
+    # Ensure we're on latest code
+    ensure_git_status_clean unless ENV["SKIP_GIT_CHECK"]
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Beta: Build and upload to internal track
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Build and upload to Play Console internal track"
+  lane :beta do |options|
+    if options[:version_code] || options[:version_name]
+      bump(options)
+    end
+
+    # Build release AAB (Android App Bundle)
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      project_dir: ".."
+    )
+
+    changelog = ENV["FASTLANE_CHANGELOG"] || "Bug fixes and improvements"
+
+    # Upload to Play Console internal track
+    upload_to_play_store(
+      track: "internal",
+      aab: lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH],
+      json_key: play_credentials,
+      release_status: "completed",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Release: Build and submit to production
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Build and submit to Play Console production"
+  lane :release do |options|
+    unless options[:version_name]
+      UI.user_error!("Version name is required for release. Use: fastlane release version_name:X.Y.Z")
+    end
+
+    bump(options)
+
+    # Build release AAB
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      project_dir: ".."
+    )
+
+    changelog = ENV["FASTLANE_CHANGELOG"] || "New features and improvements"
+
+    # Upload to Play Console production track
+    upload_to_play_store(
+      track: "production",
+      aab: lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH],
+      json_key: play_credentials,
+      release_status: "draft",  # Change to "completed" for immediate release
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Build: Build only, no upload
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Build the app without uploading"
+  lane :build do |options|
+    if options[:version_code] || options[:version_name]
+      bump(options)
+    end
+
+    gradle(
+      task: "assemble",
+      build_type: "Release",
+      project_dir: ".."
+    )
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Build Debug: Build debug APK
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Build debug APK"
+  lane :build_debug do
+    gradle(
+      task: "assemble",
+      build_type: "Debug",
+      project_dir: ".."
+    )
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Bump: Update version code and/or name
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Update version code and name"
+  lane :bump do |options|
+    # Read current version from build.gradle.kts
+    gradle_file = "../app/build.gradle.kts"
+
+    if options[:version_name]
+      # Update versionName in build.gradle.kts
+      version_name = options[:version_name]
+      sh("sed -i '' 's/versionName = \"[^\"]*\"/versionName = \"#{version_name}\"/' #{gradle_file}")
+      UI.success("Version name set to #{version_name}")
+    end
+
+    if options[:version_code]
+      # Update versionCode in build.gradle.kts
+      version_code = options[:version_code]
+      sh("sed -i '' 's/versionCode = [0-9]*/versionCode = #{version_code}/' #{gradle_file}")
+      UI.success("Version code set to #{version_code}")
+    elsif !options[:version_code] && !options[:version_name]
+      # Auto-increment version code
+      current_code = sh("grep 'versionCode = ' #{gradle_file} | sed 's/.*versionCode = \\([0-9]*\\).*/\\1/'").strip.to_i
+      new_code = current_code + 1
+      sh("sed -i '' 's/versionCode = [0-9]*/versionCode = #{new_code}/' #{gradle_file}")
+      UI.success("Version code incremented to #{new_code}")
+    end
+
+    # Commit version bump
+    unless ENV["SKIP_GIT_COMMIT"]
+      git_commit(
+        path: gradle_file,
+        message: "Bump Android version"
+      )
+    end
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Tests: Run unit tests
+  # ─────────────────────────────────────────────────────────────────────────────
+  desc "Run all tests"
+  lane :test do
+    gradle(
+      task: "test",
+      project_dir: ".."
+    )
+  end
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Error handling
+  # ─────────────────────────────────────────────────────────────────────────────
+  error do |lane, exception|
+    UI.error("Lane #{lane} failed with: #{exception.message}")
+  end
+end

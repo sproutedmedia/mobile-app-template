@@ -73,6 +73,26 @@ cd android-app && ./gradlew test           # Unit tests
 cd android-app && ./gradlew check          # All checks
 ```
 
+### Deployment (Fastlane)
+
+```bash
+# Setup (first time only)
+cp .fastlane-config.template .fastlane-config
+# Edit .fastlane-config with your 1Password vault/item details
+
+# iOS - TestFlight
+fastlane-release beta
+
+# iOS - App Store
+fastlane-release release
+
+# Android - Internal Track
+cd android-app/fastlane && bundle exec fastlane beta
+
+# Android - Production
+cd android-app/fastlane && bundle exec fastlane release version_name:X.Y.Z
+```
+
 ## Code Style Guidelines
 
 - **iOS**: Follow SwiftLint rules in `.swiftlint.yml`, format with SwiftFormat

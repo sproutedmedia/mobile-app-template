@@ -1,0 +1,22 @@
+# =============================================================================
+# {{PROJECT_NAME}} Android Appfile
+# =============================================================================
+# This file contains app-specific configuration for fastlane.
+# Update these values after running setup.sh
+# =============================================================================
+
+# Android package name (application ID)
+# Must match applicationId in app/build.gradle.kts
+package_name("com.{{PACKAGE_NAME}}")
+
+# Path to Google Play Console service account JSON
+# This is typically fetched from 1Password by the fastlane-release script
+# If stored locally (not recommended), update this path
+json_key_file(ENV["GOOGLE_PLAY_JSON_KEY_FILE"] || "play-store-credentials.json")
+
+# =============================================================================
+# Per-lane overrides (optional)
+# =============================================================================
+# for_lane :beta do
+#   package_name("com.{{PACKAGE_NAME}}.beta")
+# end

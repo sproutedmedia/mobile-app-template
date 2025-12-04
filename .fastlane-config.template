@@ -1,0 +1,74 @@
+# =============================================================================
+# Fastlane Configuration Template
+# =============================================================================
+# Copy this to .fastlane-config in your project root and customize.
+#
+# This file is used by the workspace's fastlane-release script to:
+#   1. Locate your project's fastlane directory
+#   2. Fetch App Store Connect / Play Console credentials from 1Password
+#
+# Usage:
+#   cp .fastlane-config.template .fastlane-config
+#   # Edit with your values
+#   fastlane-release beta     # Build and upload
+# =============================================================================
+
+# Project display name (for logging)
+PROJECT_NAME="{{PROJECT_NAME}}"
+
+# =============================================================================
+# iOS Configuration (for App Store Connect)
+# =============================================================================
+
+# Path to iOS fastlane directory (relative to this file)
+FASTLANE_DIR="ios-app/fastlane"
+
+# 1Password vault containing App Store Connect credentials
+OP_VAULT="Private"
+
+# 1Password item name containing credentials
+# Should have fields: KEY_ID, ISSUER_ID, and the .p8 file as an attachment
+OP_ITEM="AppStoreConnect"
+
+# Name of the .p8 key file attachment in 1Password
+# Format: AuthKey_XXXXXX.p8 (where XXXXXX is your KEY_ID)
+OP_KEY_FILE="AuthKey_XXXXXX.p8"
+
+# =============================================================================
+# Android Configuration (for Play Console)
+# =============================================================================
+# Note: Android deployment requires a separate script or modify this for both
+
+# Uncomment and configure for Android:
+# ANDROID_FASTLANE_DIR="android-app/fastlane"
+#
+# 1Password item containing Google Play Console service account JSON
+# Should have the JSON file as an attachment named "service-account.json"
+# OP_PLAY_ITEM="PlayConsole"
+# OP_PLAY_JSON_FILE="service-account.json"
+
+# =============================================================================
+# Setup Instructions
+# =============================================================================
+#
+# 1. App Store Connect API Key (iOS):
+#    a. Go to https://appstoreconnect.apple.com/access/api
+#    b. Create a new key with "App Manager" role
+#    c. Download the .p8 file (only available once!)
+#    d. Note the KEY_ID and ISSUER_ID
+#    e. In 1Password, create an item with:
+#       - Field "KEY_ID" = your key ID
+#       - Field "ISSUER_ID" = your issuer ID
+#       - Attachment = the .p8 file (name it AuthKey_[KEY_ID].p8)
+#
+# 2. Google Play Console Service Account (Android):
+#    a. Go to Google Cloud Console → IAM & Admin → Service Accounts
+#    b. Create a service account for your project
+#    c. Download the JSON key file
+#    d. In Play Console, grant the service account "Release Manager" access
+#    e. In 1Password, create an item with the JSON as an attachment
+#
+# 3. Run fastlane-release:
+#    fastlane-release beta      # iOS TestFlight
+#    fastlane-release release   # iOS App Store
+# =============================================================================

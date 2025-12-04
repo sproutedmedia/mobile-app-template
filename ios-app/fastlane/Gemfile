@@ -1,0 +1,14 @@
+# =============================================================================
+# {{PROJECT_NAME}} iOS Fastlane Dependencies
+# =============================================================================
+# Install: bundle install
+# Run:     bundle exec fastlane [lane]
+# =============================================================================
+
+source "https://rubygems.org"
+
+gem "fastlane", "~> 2.225"
+
+# Optional plugins (uncomment as needed)
+# gem "fastlane-plugin-firebase_app_distribution"
+# gem "fastlane-plugin-versioning"
