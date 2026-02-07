@@ -118,3 +118,12 @@ See `docs/AI-ASSISTANTS.md` for side-by-side guidance that also applies when dev
 - Run `./setup.sh` first to customize the template for a new project
 - iOS requires macOS with Xcode 15+
 - Android requires JDK 17 and Android SDK 34+
+
+## Security Standards
+
+This project follows workspace security standards:
+- All credentials go through 1Password
+- No hardcoding secrets, ever
+- Use .env.tpl with op:// references
+
+See: ~/Developer/cursor-workspaces/docs/security/
