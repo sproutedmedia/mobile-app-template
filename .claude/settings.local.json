@@ -1,32 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls:*)",
-      "Bash(cat:*)",
-      "Bash(find:*)",
-      "Bash(/usr/bin/find:*)",
-      "Bash(/usr/bin/grep:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(git pull:*)",
-      "Bash(chmod:*)",
       "Bash(./scripts/customize-issue-templates.sh:*)",
-      "Bash(git checkout:*)",
       "Bash(claude doctor)",
-      "Bash(echo:*)",
-      "Bash(python3:*)",
-      "Bash(file:*)",
-      "Bash(head:*)",
-      "Bash(xxd:*)",
-      "Bash(gh issue list:*)",
-      "Bash(gh issue create:*)",
-      "Bash(gh label list:*)",
-      "Bash(gh issue edit:*)",
-      "Bash(gh issue pin:*)",
-      "Bash(gh issue comment:*)"
-    ],
-    "deny": [],
-    "ask": []
+      "Bash(xxd:*)"
+    ]
   }
 }
