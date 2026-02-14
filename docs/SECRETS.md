@@ -154,5 +154,5 @@ op run --env-file=.env.tpl -- fastlane beta
 ## Related Documentation
 
 - [1Password CLI Documentation](https://developer.1password.com/docs/cli/)
-- Workspace: `~/Developer/cursor-workspaces/docs/security/1password-cli-cheatsheet.md`
+- Workspace: `~/Developer/workbench/docs/security/1password-cli-cheatsheet.md`
 

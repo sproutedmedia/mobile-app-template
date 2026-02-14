@@ -126,4 +126,4 @@ This project follows workspace security standards:
 - No hardcoding secrets, ever
 - Use .env.tpl with op:// references
 
-See: ~/Developer/cursor-workspaces/docs/security/
+See: ~/Developer/workbench/docs/security/
