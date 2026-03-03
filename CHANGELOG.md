@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-03-03
+
+### Added
+
+- **AGENTS.md Symlink** — `AGENTS.md` symlinks to `CLAUDE.md`, making the repo discoverable by Codex and future agent systems while keeping a single source of truth
+
+- **Adoption Guide** — `docs/ADOPTION.md` migration playbook for existing projects
+  - Six independent layers: Code Quality, Architecture, AI Integration, Security, CI/CD, Dev Tooling
+  - Each layer lists files to copy, how to adapt them, and what to customize
+  - Includes guidance on adapting CLAUDE.md for existing projects
+
+- **`/adopt` Slash Command** — Agent-assisted adoption flow in `.claude/commands/adopt.md`
+  - Multi-select layer picker (or pass layers as arguments)
+  - Platform detection (iOS, Android, or both)
+  - Scans existing project structure and reports delta
+  - Copies and adapts config files for each selected layer
+  - Generates customized CLAUDE.md reflecting the actual project
+
+### Changed
+
+- **TEMPLATE-README.md** — Added Codex row to AI assistant table, `/adopt` to slash commands, and adoption section
+- **CLAUDE.md** — Added `/adopt` to slash commands list and adoption note in Important Notes
+
 ## [1.3.0] - 2025-12-03
 
 ### Added

@@ -109,12 +109,14 @@ This project includes Claude Code slash commands for common tasks:
 - `/test` - Run all tests
 - `/check-env` - Verify development environment
 - `/new-screen` - Generate a new screen with proper structure
+- `/adopt` - Adopt template layers into an existing project
 
 See `docs/AI-ASSISTANTS.md` for side-by-side guidance that also applies when developers use Codex or similar tools.
 
 ## Important Notes
 
 - This is a **template** - placeholders like `{{PROJECT_NAME}}` are replaced by `setup.sh`
+- For existing projects, run `/adopt` or see `docs/ADOPTION.md`
 - Run `./setup.sh` first to customize the template for a new project
 - iOS requires macOS with Xcode 15+
 - Android requires JDK 17 and Android SDK 34+

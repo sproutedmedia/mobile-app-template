@@ -121,6 +121,7 @@ This template includes configuration for multiple AI coding assistants:
 | Tool | Config File | Description |
 |------|-------------|-------------|
 | **Claude Code** | `CLAUDE.md`, `.claude/` | Project context, slash commands, session hooks |
+| **Codex** | `AGENTS.md` | Symlink to CLAUDE.md — universal project context |
 | **Cursor** | `.cursorrules` | Project rules and code style guidelines |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | Code generation instructions |
 
@@ -136,10 +137,15 @@ This template includes configuration for multiple AI coding assistants:
 | `/test` | Run all tests |
 | `/check-env` | Verify development environment |
 | `/new-screen` | Generate a new screen with MVVM structure |
+| `/adopt` | Adopt template layers into an existing project |
 
 ### Workflow Playbooks
 
 See `docs/AI-ASSISTANTS.md` for detailed playbooks that work across all AI assistants.
+
+## Adopting into an Existing Project
+
+Have an existing mobile app and want to adopt this template's tooling? See [`docs/ADOPTION.md`](docs/ADOPTION.md) for a layer-by-layer migration guide, or run `/adopt` from Claude Code for an interactive, agent-assisted adoption flow.
 
 ## Customization
 
