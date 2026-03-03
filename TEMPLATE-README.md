@@ -15,11 +15,11 @@ A reusable template for cross-platform iOS and Android mobile applications.
 
 ```bash
 # Create a new repo from this template (recommended)
-gh repo create my-new-app --template sproutedmedia/mobile-app-template --private --clone
+gh repo create my-new-app --template your-org/mobile-app-template --private --clone
 cd my-new-app
 
 # Or for a public repo:
-gh repo create my-new-app --template sproutedmedia/mobile-app-template --public --clone
+gh repo create my-new-app --template your-org/mobile-app-template --public --clone
 cd my-new-app
 ```
 

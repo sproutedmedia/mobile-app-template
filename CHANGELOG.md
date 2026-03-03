@@ -15,9 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Gemfiles for fastlane dependencies
   - Appfiles with placeholder configuration
 
-- **1Password Integration Template** - `.fastlane-config.template` for secure credential management
-  - Works with workspace `fastlane-release` script
-  - Stores App Store Connect API keys and Play Console service accounts in 1Password
+- **Secure Credential Management Template** - `.fastlane-config.template` for deployment credential management
+  - Documents App Store Connect API keys and Play Console service account setup
+  - Supports 1Password CLI (`op`) integration for secure credential injection
   - Never commit credentials to git
 
 ### Documentation
@@ -142,7 +142,7 @@ The following placeholders are replaced by `setup.sh`:
 - `{{GITHUB_OWNER}}` - GitHub username/org
 - `{{DATE}}` - Setup date
 
-[1.2.0]: https://github.com/sproutedmedia/mobile-app-template/releases/tag/v1.2.0
-[1.1.1]: https://github.com/sproutedmedia/mobile-app-template/releases/tag/v1.1.1
-[1.1.0]: https://github.com/sproutedmedia/mobile-app-template/releases/tag/v1.1.0
-[1.0.0]: https://github.com/sproutedmedia/mobile-app-template/releases/tag/v1.0.0
+[1.2.0]: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/releases/tag/v1.2.0
+[1.1.1]: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/releases/tag/v1.1.1
+[1.1.0]: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/releases/tag/v1.1.0
+[1.0.0]: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/releases/tag/v1.0.0

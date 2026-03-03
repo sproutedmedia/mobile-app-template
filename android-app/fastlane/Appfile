@@ -10,7 +10,7 @@
 package_name("com.{{PACKAGE_NAME}}")
 
 # Path to Google Play Console service account JSON
-# This is typically fetched from 1Password by the fastlane-release script
+# Set via GOOGLE_PLAY_JSON_KEY_FILE environment variable or secrets manager
 # If stored locally (not recommended), update this path
 json_key_file(ENV["GOOGLE_PLAY_JSON_KEY_FILE"] || "play-store-credentials.json")
 

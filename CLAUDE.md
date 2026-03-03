@@ -78,13 +78,13 @@ cd android-app && ./gradlew check          # All checks
 ```bash
 # Setup (first time only)
 cp .fastlane-config.template .fastlane-config
-# Edit .fastlane-config with your 1Password vault/item details
+# Edit .fastlane-config with your secrets manager vault/item details
 
 # iOS - TestFlight
-fastlane-release beta
+cd ios-app/fastlane && bundle exec fastlane beta
 
 # iOS - App Store
-fastlane-release release
+cd ios-app/fastlane && bundle exec fastlane release version:X.Y.Z
 
 # Android - Internal Track
 cd android-app/fastlane && bundle exec fastlane beta
@@ -121,9 +121,6 @@ See `docs/AI-ASSISTANTS.md` for side-by-side guidance that also applies when dev
 
 ## Security Standards
 
-This project follows workspace security standards:
-- All credentials go through 1Password
+- All credentials go through a secrets manager (1Password CLI recommended)
 - No hardcoding secrets, ever
-- Use .env.tpl with op:// references
-
-See: ~/Developer/workbench/docs/security/
+- Use `.env.tpl` with `op://` references for 1Password, or your preferred secrets manager's equivalent

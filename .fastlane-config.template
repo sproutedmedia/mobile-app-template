@@ -3,14 +3,13 @@
 # =============================================================================
 # Copy this to .fastlane-config in your project root and customize.
 #
-# This file is used by the workspace's fastlane-release script to:
-#   1. Locate your project's fastlane directory
-#   2. Fetch App Store Connect / Play Console credentials from 1Password
+# This file documents your project's deployment credentials and where they
+# are stored in your secrets manager (1Password recommended).
 #
 # Usage:
 #   cp .fastlane-config.template .fastlane-config
 #   # Edit with your values
-#   fastlane-release beta     # Build and upload
+#   cd ios-app/fastlane && bundle exec fastlane beta
 # =============================================================================
 
 # Project display name (for logging)
@@ -68,7 +67,8 @@ OP_KEY_FILE="AuthKey_XXXXXX.p8"
 #    d. In Play Console, grant the service account "Release Manager" access
 #    e. In 1Password, create an item with the JSON as an attachment
 #
-# 3. Run fastlane-release:
-#    fastlane-release beta      # iOS TestFlight
-#    fastlane-release release   # iOS App Store
+# 3. Deploy:
+#    cd ios-app/fastlane && bundle exec fastlane beta      # iOS TestFlight
+#    cd ios-app/fastlane && bundle exec fastlane release version:X.Y.Z  # iOS App Store
+#    cd android-app/fastlane && bundle exec fastlane beta   # Android internal
 # =============================================================================

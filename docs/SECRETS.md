@@ -1,12 +1,12 @@
 # Secrets Management Guide
 
-This project uses **1Password CLI** for secure secrets management.
+This project uses a **secrets manager** for secure credential handling. [1Password CLI](https://developer.1password.com/docs/cli/) is the recommended approach, but any secrets manager that injects environment variables will work.
 
 ## Policy
 
-**All credentials go through 1Password. No hardcoding. No exceptions.**
+**All credentials go through a secrets manager. No hardcoding. No exceptions.**
 
-## Quick Start
+## Quick Start (1Password CLI)
 
 ### 1. Install 1Password CLI
 
@@ -41,7 +41,7 @@ ASC_ISSUER_ID=op://Development/AppStoreConnect/ISSUER_ID
 op run --env-file=.env.tpl -- ./scripts/build.sh
 
 # For fastlane
-op run --env-file=.env.tpl -- fastlane beta
+op run --env-file=.env.tpl -- bundle exec fastlane beta
 ```
 
 ## Creating 1Password Entries
@@ -102,7 +102,7 @@ Ensure your `.gitignore` includes:
 ### iOS (Swift)
 
 ```swift
-// Read from environment (set via 1Password injection)
+// Read from environment (set via secrets manager injection)
 guard let apiKey = ProcessInfo.processInfo.environment["API_KEY"] else {
     fatalError("API_KEY not set. Run with: op run --env-file=.env.tpl -- xcodebuild")
 }
@@ -119,8 +119,8 @@ val apiKey = BuildConfig.API_KEY
 
 ```kotlin
 // Read from environment or properties
-val apiKey: String = System.getenv("API_KEY") 
-    ?: project.findProperty("API_KEY")?.toString() 
+val apiKey: String = System.getenv("API_KEY")
+    ?: project.findProperty("API_KEY")?.toString()
     ?: error("API_KEY not set")
 
 buildConfigField("String", "API_KEY", "\"$apiKey\"")
@@ -145,14 +145,12 @@ jobs:
 
 ### fastlane
 
-Use the workspace's `fastlane-release` script which handles 1Password integration automatically, or run fastlane with:
+Run fastlane with secrets injected:
 
 ```bash
-op run --env-file=.env.tpl -- fastlane beta
+op run --env-file=.env.tpl -- bundle exec fastlane beta
 ```
 
 ## Related Documentation
 
 - [1Password CLI Documentation](https://developer.1password.com/docs/cli/)
-- Workspace: `~/Developer/workbench/docs/security/1password-cli-cheatsheet.md`
-

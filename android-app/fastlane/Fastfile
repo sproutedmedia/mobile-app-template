@@ -10,14 +10,14 @@
 #   bump    - Update version code/name
 #
 # Prerequisites:
-#   - Google Play Console Service Account JSON (stored in 1Password)
-#   - Keystore for signing (stored in 1Password or local)
+#   - Google Play Console Service Account JSON (stored in secrets manager)
+#   - Keystore for signing (stored in secrets manager or local)
 # =============================================================================
 
 default_platform(:android)
 
 # Play Console API authentication
-# Service account JSON is fetched from 1Password by fastlane-release script
+# Service account JSON path — set via GOOGLE_PLAY_JSON_KEY_FILE env var or secrets manager
 def play_credentials
   ENV["GOOGLE_PLAY_JSON_KEY_FILE"] || "play-store-credentials.json"
 end

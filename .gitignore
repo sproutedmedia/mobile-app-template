@@ -94,6 +94,7 @@ node_modules/
 .env
 .env.local
 .env.*.local
+.envrc
 *.pem
 *.p12
 *.mobileprovision
