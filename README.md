@@ -70,7 +70,8 @@ cd android-app && ./gradlew assembleDebug
 ├── scripts/                    # Development scripts
 │   ├── install-ios-tools.sh
 │   ├── install-android-tools.sh
-│   └── verify-dev-environment.sh
+│   ├── verify-dev-environment.sh
+│   └── verify-setup.sh
 └── docs/                       # Documentation
     ├── SETUP.md
     └── DEVELOPMENT.md
@@ -132,6 +133,7 @@ This project includes configuration for AI coding assistants:
 - [Development Guide](docs/DEVELOPMENT.md) - Development workflow and best practices
 - [Secrets Management](docs/SECRETS.md) - 1Password integration & security practices
 - [AI Assistant Guide](docs/AI-ASSISTANTS.md) - Playbooks for AI-assisted development
+- [Contributing](CONTRIBUTING.md) - How to contribute to this project
 
 ## License
 

@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-03-03
+
+### Added
+
+- **CONTRIBUTING.md** — Contribution guidelines with quick start, branch naming, commit conventions, pre-PR checklist, code review expectations, and links to issue templates (#8)
+
+- **`scripts/verify-setup.sh`** — Post-setup verification script that checks for remaining `{{` placeholders in source files, validates iOS directory renames and Xcode project integrity, and verifies Android package directory renames and Gradle files (#9)
+
+- **`.env.example`** — Documents all environment variables with placeholder values for API config, analytics, Firebase, feature flags, and debug settings. Explains relationship to `env-template.tpl` for 1Password integration (#10)
+
+### Changed
+
+- **`setup.sh`** — Added `verify-setup.sh` as first recommended next step after setup completes
+- **`docs/SETUP.md`** — Added "Environment Variables" section covering `.env.example` vs `env-template.tpl`, iOS scheme env vars, Android `local.properties` + `buildConfigField` pattern, and link to `docs/SECRETS.md`
+- **`README.md`** — Added `verify-setup.sh` to project structure tree and CONTRIBUTING.md link to documentation section
+- **`TEMPLATE-README.md`** — Added `verify-setup.sh` to scripts tree, `CONTRIBUTING.md` and `.env.example` to root file listing
+- **Android Release Builds** — Enabled R8 minification (`isMinifyEnabled = true`) and resource shrinking (`isShrinkResources = true`) for release build type. Added baseline ProGuard rules for Kotlin, coroutines, and Jetpack Compose with commented examples for common libraries (Retrofit, Gson, Moshi, Room, Firebase) (#11)
+
+- **Structured Logging** — Added platform-native logging utilities (#15)
+  - iOS: `Log` enum wrapping OSLog with debug/info/warning/error levels and category support; debug logs stripped from release builds
+  - Android: `AppLogger` wrapping Timber with tag-based logging; initialized in `{{THEME_NAME}}Application`
+
+- **Networking Layer** — Added API client boilerplate with error handling (#14)
+  - iOS: `APIClient` actor with async/await, `Endpoint` enum for type-safe API definitions, `APIError` for structured errors
+  - Android: Retrofit + OkHttp + Gson setup with `ApiService` interface, `ApiClient` singleton, `NetworkResult` sealed class, debug logging interceptor
+
+- **Settings Screen** — Complete reference feature demonstrating MVVM, navigation, and local persistence (#13)
+  - iOS: `SettingsView` + `SettingsViewModel` using `@AppStorage` for persistence, navigation via toolbar gear icon
+  - Android: `SettingsScreen` + `SettingsViewModel` using DataStore Preferences, navigation via top bar settings icon
+  - Both: Dark mode toggle, notifications toggle, app version display, unit tests
+
+### Dependencies Added
+
+- **Android**: Timber 5.0.1, Retrofit 2.11.0, OkHttp logging 4.12.0, Gson converter, DataStore Preferences 1.1.1, Material Icons Extended
+
 ## [1.4.0] - 2026-03-03
 
 ### Added
@@ -165,6 +200,9 @@ The following placeholders are replaced by `setup.sh`:
 - `{{GITHUB_OWNER}}` - GitHub username/org
 - `{{DATE}}` - Setup date
 
+[1.5.0]: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/releases/tag/v1.5.0
+[1.4.0]: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/releases/tag/v1.4.0
+[1.3.0]: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/releases/tag/v1.3.0
 [1.2.0]: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/releases/tag/v1.2.0
 [1.1.1]: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/releases/tag/v1.1.1
 [1.1.0]: https://github.com/{{GITHUB_OWNER}}/{{PROJECT_NAME}}/releases/tag/v1.1.0

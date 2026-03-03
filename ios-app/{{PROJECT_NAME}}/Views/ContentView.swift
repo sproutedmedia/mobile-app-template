@@ -24,6 +24,13 @@ struct ContentView: View {
             }
             .padding()
             .navigationTitle("{{PROJECT_NAME}}")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: SettingsView()) {
+                        Image(systemName: "gear")
+                    }
+                }
+            }
         }
     }
 }

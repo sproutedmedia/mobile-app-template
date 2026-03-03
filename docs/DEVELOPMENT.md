@@ -98,26 +98,32 @@ Configuration files:
 ```
 {{PROJECT_NAME}}/
 ├── App/              # App entry point
-├── Views/            # SwiftUI views
-├── ViewModels/       # View models (MVVM)
-├── Models/           # Data models
-├── Services/         # Business logic, API
-└── Utilities/        # Helpers, extensions
+├── Views/            # SwiftUI views (ContentView, SettingsView)
+├── ViewModels/       # View models (SettingsViewModel)
+├── Models/           # Data models (User)
+├── Services/         # API client, endpoints, business logic
+└── Utilities/        # Helpers, extensions, logging
 ```
 
 ### Android
 
 ```
 app/src/main/java/com/{{PACKAGE_NAME}}/
-├── MainActivity.kt   # Entry point
+├── {{THEME_NAME}}Application.kt  # Application class (logger init)
+├── MainActivity.kt               # Entry point
 ├── ui/
-│   ├── screens/      # Compose screens
-│   ├── components/   # Reusable components
-│   └── theme/        # Theme, colors, typography
-├── data/             # Data layer
-│   ├── models/       # Data models
-│   └── repository/   # Data repositories
-└── domain/           # Business logic
+│   ├── screens/                   # Compose screens
+│   │   ├── MainScreen.kt
+│   │   ├── profile/               # User profile feature
+│   │   └── settings/              # Settings feature
+│   ├── components/                # Reusable components
+│   └── theme/                     # Theme, colors, typography
+├── data/
+│   ├── model/                     # Data models
+│   ├── remote/                    # Networking (Retrofit)
+│   └── repository/                # Data repositories
+├── domain/                        # Business logic
+└── utilities/                     # Logging
 ```
 
 ## Building
@@ -179,18 +185,89 @@ cd android-app
 ./gradlew connectedAndroidTest
 ```
 
+## Logging
+
+### iOS (OSLog)
+
+Use the `Log` utility instead of `print()` for structured, filterable logging:
+
+```swift
+Log.debug("User tapped button", category: "UI")
+Log.info("Fetched 42 items", category: "Network")
+Log.warning("Cache miss", category: "Data")
+Log.error("Failed to save", category: "Persistence")
+```
+
+- Debug logs are **stripped from release builds** (`#if DEBUG`)
+- View logs in Console.app, filter by subsystem or category
+- See `Utilities/Logger.swift`
+
+### Android (Timber)
+
+Use `AppLogger` instead of `Log.d()` for automatic tag management:
+
+```kotlin
+AppLogger.d("Network", "Request started: GET /users")
+AppLogger.i("Auth", "User logged in")
+AppLogger.w("Cache", "Cache miss for key: user_profile")
+AppLogger.e("Database", "Failed to write", exception)
+```
+
+- Debug tree auto-strips in release builds
+- Add a crash-reporting tree (e.g., Crashlytics) for production
+- Initialized in `{{THEME_NAME}}Application.onCreate()`
+- See `utilities/AppLogger.kt`
+
+## Networking
+
+### iOS (URLSession + async/await)
+
+Use `APIClient` and `Endpoint` for type-safe API calls:
+
+```swift
+// Define endpoints in Endpoint.swift
+case users
+case user(id: String)
+
+// Make requests
+let users: [User] = try await APIClient.shared.request(.users)
+```
+
+- Automatic JSON decoding with snake_case conversion
+- Structured error handling via `APIError`
+- Logging integrated via `Log` utility
+- See `Services/APIClient.swift` and `Services/Endpoint.swift`
+
+### Android (Retrofit)
+
+Use `ApiClient.service` for API calls:
+
+```kotlin
+// Define endpoints in ApiService.kt
+@GET("users")
+suspend fun getUsers(): List<User>
+
+// Make requests
+val users = ApiClient.service.getUsers()
+```
+
+- OkHttp logging interceptor (debug builds only)
+- Gson for JSON serialization
+- `NetworkResult` sealed class for loading/success/error states
+- See `data/remote/` package
+
 ## Debugging
 
 ### iOS
 
 1. Set breakpoints in Xcode
-2. Use `print()` or `debugPrint()` for logging
+2. Use `Log.debug()` for structured logging (see Logging section above)
 3. Use Instruments for performance profiling
 
 ### Android
 
 1. Set breakpoints in Android Studio
-2. Use `Log.d("TAG", "message")` for logging
+2. Use `AppLogger.d()` for structured logging (see Logging section above)
 3. Use Android Profiler for performance
 
 ### Screen Mirroring (Android)

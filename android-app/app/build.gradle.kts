@@ -22,7 +22,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -72,6 +73,20 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.coil.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // Logging
+    implementation(libs.timber)
+
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp.logging)
+
+    // Settings / Preferences
+    implementation(libs.androidx.datastore.preferences)
+
+    // Extended Material Icons (for Settings gear icon, etc.)
+    implementation(libs.androidx.material.icons.extended)
 
     // Testing
     testImplementation(libs.junit)

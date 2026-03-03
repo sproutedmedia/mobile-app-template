@@ -79,7 +79,8 @@ mobile-app-template/
 ├── scripts/
 │   ├── install-ios-tools.sh
 │   ├── install-android-tools.sh
-│   └── verify-dev-environment.sh
+│   ├── verify-dev-environment.sh
+│   └── verify-setup.sh
 ├── .github/
 │   ├── workflows/               # CI/CD pipelines
 │   ├── copilot-instructions.md  # GitHub Copilot config
@@ -90,6 +91,8 @@ mobile-app-template/
 ├── docs/
 ├── setup.sh                     # Template customization script
 ├── CLAUDE.md                    # AI assistant context (works with all)
+├── CONTRIBUTING.md              # Contribution guidelines
+├── .env.example                 # Environment variable documentation
 ├── .cursorrules                 # Cursor rules
 └── README.md
 ```

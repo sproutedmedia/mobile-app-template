@@ -699,18 +699,21 @@ Your project "$PROJECT_NAME" is ready!
 
 🔧 Next Steps:
 
-  1. Verify your environment:
+  1. Verify setup completed correctly:
+     ./scripts/verify-setup.sh
+
+  2. Verify your environment:
      ./scripts/verify-dev-environment.sh
 
-  2. Install development tools (if needed):
+  3. Install development tools (if needed):
      ./scripts/install-ios-tools.sh
      ./scripts/install-android-tools.sh
 
-  3. Open in your IDE:
+  4. Open in your IDE:
      iOS:     open ios-app/$PROJECT_NAME.xcodeproj
      Android: Open android-app/ in Android Studio
 
-  4. Run linters:
+  5. Run linters:
      iOS:     cd ios-app && swiftlint
      Android: cd android-app && ./gradlew ktlintCheck detekt
 
