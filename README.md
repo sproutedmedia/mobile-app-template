@@ -132,7 +132,6 @@ This project includes configuration for AI coding assistants:
 - [Development Guide](docs/DEVELOPMENT.md) - Development workflow and best practices
 - [Secrets Management](docs/SECRETS.md) - 1Password integration & security practices
 - [AI Assistant Guide](docs/AI-ASSISTANTS.md) - Playbooks for AI-assisted development
-- [Developer Value Review](docs/DEVELOPER-VALUE.md) - Current strengths, risks, and recommended improvements
 
 ## License
 
