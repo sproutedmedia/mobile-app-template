@@ -114,3 +114,7 @@ coverage/
 *.gcno
 *.gcda
 *.gcov
+
+# Agent dispatch reports (operational, not source)
+_dispatch/
+_orchestrator/
