@@ -31,7 +31,7 @@ import time
 # Repo root: this file lives at <root>/.claude/hooks/brain_compile.py
 DERIVED_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-__version__ = "3.0.0"
+__version__ = "3.1.0"
 
 TIER_EMOJI = {
     "locked": "🔒", "deferred": "⏸", "presumed": "🟡",
@@ -42,10 +42,48 @@ WRITE_VERBS = {"capture", "dispose", "state"}
 DEDUP_RATIO = 0.85  # difflib similarity above which two same-area titles are "the same"
 CHECKPOINT_STALE_HOURS = 48
 STALE_AFTER_DAYS = 21  # age >= this many days is flagged ⚠ stale (inclusive)
+PARK_AFTER_DAYS = STALE_AFTER_DAYS  # pending older than this collapses to "parked" (tunable later)
 # Progressive disclosure / §11 token budget: cap how many full locked bodies
 # (L1) get injected when a broad cwd glob matches many decisions. Overflow is
 # summarized in one line pointing back to DECISIONS.md.
 L1_MAX_BODIES = 8
+
+# --- Shared legibility layer (single source of truth for both emitters) -------
+TIER_PHRASE = {
+    "presumed": "you leaned this way but didn't confirm",
+    "open": "still open",
+    "needs-research": "needs research",
+    "locked": "settled",
+    "deferred": "parked",
+    "superseded": "dropped",
+}
+
+# Operator-facing consequence + reversibility for each reconcile choice.
+CHOICE_HELP = {
+    "lock": "settled; agents won't reopen (reversible)",
+    "defer": "ask me again next session (reversible)",
+    "kill": "remove from the cockpit for good (reversible via git history)",
+}
+
+
+def tier_phrase(tier):
+    return TIER_PHRASE.get(tier, tier or "unknown")
+
+
+def age_phrase(age_days):
+    """Plain-English age. Undatable or future-dated (negative) → 'age unknown'."""
+    if age_days is None or age_days < 0:
+        return "age unknown"
+    if age_days == 0:
+        return "today"
+    if age_days == 1:
+        return "yesterday"
+    if age_days < 14:
+        return "%d days ago" % age_days
+    if age_days < 60:
+        return "%d weeks ago" % (age_days // 7)
+    return "%d months ago" % (age_days // 30)
+
 
 # H3 (`###`) is reserved for decision-entry headers — do NOT use H3 for
 # sub-headings inside a decision body (it would start a spurious entry).
@@ -85,6 +123,7 @@ def parse_decisions(text):
             "id": m.group("id").strip(), "title": (m.group("title") or "").strip(),
             "tier": None, "area": "", "files": "",
             "decided": "", "validated": "", "issue": "", "source": "",
+            "line": i + 1,  # 1-based heading line — anchors DECISIONS.md:<line> source refs
         }
         j = i + 1
         if j < len(lines):
@@ -338,6 +377,30 @@ def _decision_age_days(entry, today):
     return None
 
 
+def partition_pending(decisions, today):
+    """Split pending (UNCONFIRMED) decisions into (active, parked).
+
+    active = datable and age in [0, PARK_AFTER_DAYS) → newest-first (likely current work).
+    parked = age >= PARK_AFTER_DAYS or undatable/future → stalest-first, undatable sunk last.
+    """
+    active, parked = [], []
+    for d in decisions:
+        if d["tier"] not in UNCONFIRMED:
+            continue
+        age = _decision_age_days(d, today)
+        if age is not None and 0 <= age < PARK_AFTER_DAYS:
+            active.append(d)
+        else:
+            parked.append(d)
+    active.sort(key=lambda d: _decision_age_days(d, today))  # ascending age = newest first
+
+    def _stale_key(d):
+        age = _decision_age_days(d, today)
+        return (0, -age) if (age is not None and age >= 0) else (1, 0)
+    parked.sort(key=_stale_key)
+    return active, parked
+
+
 def build_inject_context(root, cwd, source, checkpoint_text=None, today=None):
     today = today or datetime.date.today()
     decisions = parse_decisions(read_text(os.path.join(root, "DECISIONS.md")))
@@ -363,36 +426,40 @@ def build_inject_context(root, cwd, source, checkpoint_text=None, today=None):
     if blk:
         parts.append("### Blockers / waiting-on\n" + blk)
 
-    # L0 LEAD — pending-decision cockpit (stalest first; undatable last)
-    pending = [d for d in decisions if d["tier"] in UNCONFIRMED]
-
-    def _stale_key(d):
-        age = _decision_age_days(d, today)
-        return (0, -age) if (age is not None and age >= 0) else (1, 0)
-
-    pending.sort(key=_stale_key)
-    if pending:
-        lead = ["## ⚠ Decisions awaiting your disposition — oldest first "
-                "(resolve 🔒 / defer ⏸ / change strategy / kill 🗑)"]
-        for d in pending:
-            age = _decision_age_days(d, today)
-            agestr = "age unknown" if (age is None or age < 0) else (
-                "%dd ⚠ stale" % age if age >= STALE_AFTER_DAYS else "%dd" % age)
-            lead.append("- %s **%s** — %s  _(%s, %s)_ · %s" % (
-                TIER_EMOJI.get(d["tier"], d["tier"]), d["id"], d["title"],
-                d["tier"], agestr, d["area"]))
+    # Decisions cockpit — active (recent) lead; parked (legacy) collapse to a count.
+    active, parked = partition_pending(decisions, today)
+    repo_slug = derive_repo_slug(root) if active else None
+    if active or parked:
+        hdr = "## Decisions — %d worth your attention now." % len(active)
+        if parked:
+            hdr += " %d older one%s parked (not shown)." % (len(parked), "" if len(parked) == 1 else "s")
+        lead = [hdr]
+        for d in active:
+            why = [ln for ln in (d.get("body") or "").splitlines() if ln.strip()]
+            why_line = why[0].strip() if why else tier_phrase(d["tier"])
+            refs = resolve_source(d, repo_slug)
+            lead.append("▸ **%s**  (%s · %s) · %s"
+                        % (d["title"], d["area"], age_phrase(_decision_age_days(d, today)), d["id"]))
+            lead.append("  %s" % why_line)
+            if refs:
+                lead.append("  source: %s" % " · ".join(refs))
+            lead.append("  → lock = %s · defer = %s · kill = %s"
+                        % (CHOICE_HELP["lock"], CHOICE_HELP["defer"], CHOICE_HELP["kill"]))
+        if parked:
+            examples = ", ".join(d["id"] for d in parked[:3])
+            more = "" if len(parked) <= 3 else ", …"
+            lead.append('▸ %d older decision%s parked — say "review parked" to clear in one pass. (e.g. %s%s)'
+                        % (len(parked), "" if len(parked) == 1 else "s", examples, more))
         parts.append("\n".join(lead))
 
-    # Settled tiers collapse to one-line summaries
+    # Settled tiers collapse to one plain-language line each.
     n_locked = sum(1 for d in decisions if d["tier"] == "locked")
     if n_locked:
-        parts.append("## %s %d locked decisions — settled; do not reopen. "
-                     "Relevant ones inject per-area below; full list in DECISIONS.md."
-                     % (TIER_EMOJI["locked"], n_locked))
+        parts.append("## %d settled decisions — do not reopen. "
+                     "Relevant ones inject per-area below; full list in DECISIONS.md." % n_locked)
     n_deferred = sum(1 for d in decisions if d["tier"] == "deferred")
     if n_deferred:
-        parts.append("## %s %d deferred — consciously parked, not active."
-                     % (TIER_EMOJI["deferred"], n_deferred))
+        parts.append("## %d parked (deferred) — consciously set aside, not active." % n_deferred)
 
     # L1 — full locked bodies scoped to cwd subdir (capped)
     rel = os.path.relpath(cwd, root)
@@ -421,6 +488,49 @@ def _git(root, *args):
                               capture_output=True, text=True, timeout=5).stdout.strip()
     except Exception:
         return ""
+
+
+# owner/repo from an SSH remote:  git@<host>:owner/repo[.git]
+_SSH_REMOTE_RE = re.compile(r"^git@(?P<host>[^:]+):(?P<slug>[^/]+/.+?)(?:\.git)?$")
+# owner/repo from an http(s)/ssh URL:  scheme://[user@]<host>[:port]/owner/repo[.git]
+_URL_REMOTE_RE = re.compile(
+    r"^(?:https?|ssh)://(?:[^@/]+@)?(?P<host>[^/:]+)(?::\d+)?/(?P<slug>[^/]+/.+?)(?:\.git)?$")
+
+
+def _host_is_github(host):
+    """Workspace SSH aliases (github.com-personal, github.com-adobe-work) normalize to github.com."""
+    return host == "github.com" or host.startswith("github.com-")
+
+
+def derive_repo_slug(root):
+    """'owner/repo' for a GitHub origin (incl. SSH-alias hosts); None otherwise.
+    Derived once per inject/rollup — never per decision."""
+    url = (_git(root, "remote", "get-url", "origin") or "").strip()
+    if not url:
+        return None
+    for rx in (_SSH_REMOTE_RE, _URL_REMOTE_RE):
+        m = rx.match(url)
+        if m and _host_is_github(m.group("host")):
+            return m.group("slug")
+    return None
+
+
+def resolve_source(entry, repo_slug):
+    """Ordered source refs for a decision (most specific first). Never raises, never a broken URL."""
+    refs = []
+    issue = (entry.get("issue") or "").strip().lstrip("#")
+    if issue:
+        if repo_slug:
+            refs.append("https://github.com/%s/issues/%s" % (repo_slug, issue))
+        else:
+            refs.append("issue #%s" % issue)
+    line = entry.get("line")
+    if line:
+        refs.append("DECISIONS.md:%d" % line)
+    files = (entry.get("files") or "").strip()
+    if files:
+        refs.append("governs %s" % files)
+    return refs
 
 
 def _atomic_write(path, text):
@@ -562,22 +672,42 @@ def build_checkpoint(root, transcript_path, trigger):
     return "\n".join(lines)
 
 
-def build_rollup(root):
+def build_rollup(root, today=None):
+    today = today or datetime.date.today()
     decisions = parse_decisions(read_text(os.path.join(root, "DECISIONS.md")))
     state = read_text(os.path.join(root, "STATE.md"))
+    repo_slug = derive_repo_slug(root)
     counts = {}
     for d in decisions:
         if d["tier"]:
             counts[d["tier"]] = counts.get(d["tier"], 0) + 1
+
+    def _item(d):
+        age = _decision_age_days(d, today)
+        return {
+            "id": d["id"], "title": d["title"], "tier": d["tier"], "area": d["area"],
+            "ageDays": age, "agePhrase": age_phrase(age),
+            "sources": resolve_source(d, repo_slug), "line": d.get("line"),
+        }
+
+    active, parked = partition_pending(decisions, today)
+    # Back-compat alias: the pre-3.1 'unconfirmed' shape (= active + parked, minimal fields).
     unconfirmed = [{"id": d["id"], "title": d["title"], "tier": d["tier"], "area": d["area"]}
-                   for d in decisions if d["tier"] in UNCONFIRMED]
+                   for d in (active + parked)]
     index = [{"id": d["id"], "title": d["title"], "tier": d["tier"],
               "area": d["area"], "validated": d["validated"]}
              for d in decisions if d["tier"] and d["tier"] != "superseded"]
     return {
         "version": 1,
         "generatedAt": _now().isoformat(timespec="seconds") + "Z",
-        "decisions": {"counts": counts, "unconfirmed": unconfirmed, "index": index},
+        "decisions": {
+            "counts": counts,
+            "active": [_item(d) for d in active],
+            "parked": {"count": len(parked), "items": [_item(d) for d in parked]},
+            "unconfirmed": unconfirmed,
+            "index": index,
+        },
+        "choiceHelp": CHOICE_HELP,
         "state": {
             "now": state_section(state, "Now")[:800],
             "next": state_section(state, "Next")[:800],
@@ -677,6 +807,31 @@ def _read_state_input(path, label):
     return read_text(path).strip()
 
 
+def _extract_posture_block(root):
+    """Carry-through for the hand-seeded '## … Project Status' block (#118).
+
+    state --write regenerates STATE.md from a fixed scaffold; without this the
+    posture cache the posture system seeds at the top would be dropped on every
+    handoff. Return the existing block verbatim (header line through the line
+    before the next '## '), or '' if absent — so a project with no posture block
+    behaves exactly as before.
+
+    Identified by the '## … Project Status' HEADER TEXT — the same contract the
+    rest of the posture tooling uses (posture.sh `^## .*Project Status`,
+    project-state-generator), NOT the compass emoji — so a block with or without
+    the 🧭 icon is preserved consistently.
+    """
+    lines = read_text(os.path.join(root, "STATE.md")).splitlines()
+    bounds = _section_bounds(lines, "Project Status")
+    if bounds is None:
+        return ""
+    start, end = bounds
+    block = lines[start:end]
+    while block and block[-1].strip() == "":
+        block.pop()
+    return "\n".join(block)
+
+
 def build_state_scaffold(root, signals=None):
     shipped = _git(root, "log", "-8", "--pretty=- %s")
     branch = _git(root, "rev-parse", "--abbrev-ref", "HEAD") or "(unknown)"
@@ -689,6 +844,11 @@ def build_state_scaffold(root, signals=None):
     parts = [
         "# State — %s   (updated: %s)" % (os.path.basename(root), today),
         "",
+    ]
+    posture = _extract_posture_block(root)   # carry the hand-seeded posture cache (#118)
+    if posture:
+        parts += [posture, ""]
+    parts += [
         "## Now",
         "<!-- FILL: one ground-truth paragraph (handoff supplies via --now-file) -->",
         "",
