@@ -47,7 +47,7 @@ import time
 # Repo root: this file lives at <root>/.claude/hooks/brain_compile.py
 DERIVED_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-__version__ = "3.3.0"
+__version__ = "3.3.1"
 
 TIER_EMOJI = {
     "locked": "🔒", "deferred": "⏸", "presumed": "🟡",
@@ -532,9 +532,14 @@ def build_inject_context(root, cwd, source, checkpoint_text=None, today=None, au
         # it and surface the FULL recovery content, else PreCompact recovery silently
         # regresses to just the pointer line. Legacy full-content checkpoints and the
         # gate-blocked notice have no pointer and pass through unchanged.
-        recovery = _deref_checkpoint(root, checkpoint_text)
+        recovery = _deref_checkpoint(root, checkpoint_text).strip()
+        # _write_boundary_capture datamarks the body at persist time, so the normal
+        # pointer path arrives already wrapped — only wrap what isn't (legacy
+        # full-content checkpoints, the gate-blocked notice).
+        if not recovery.startswith(_DATAMARK_OPEN):
+            recovery = datamark(recovery)
         parts.append("## ⏪ Continuation checkpoint (in-flight state from before the last compaction)\n"
-                     + datamark(recovery.strip()))
+                     + recovery)
 
     return "\n\n".join(parts)
 
