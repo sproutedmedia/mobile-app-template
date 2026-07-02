@@ -32,6 +32,31 @@
           }
         ]
       }
-    ]
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/brain_compile.py\" checkpoint",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/brain_compile.py\" roll",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "_brainHooksVersion": "3.3.0"
   }
 }
