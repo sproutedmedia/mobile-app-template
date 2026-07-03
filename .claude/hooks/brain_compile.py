@@ -47,7 +47,7 @@ import time
 # Repo root: this file lives at <root>/.claude/hooks/brain_compile.py
 DERIVED_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-__version__ = "3.3.1"
+__version__ = "3.3.2"
 
 TIER_EMOJI = {
     "locked": "🔒", "deferred": "⏸", "presumed": "🟡",
@@ -197,6 +197,24 @@ def state_section(text, header):
         if capturing:
             out.append(line)
     return "\n".join(out).strip()
+
+
+def first_h2_section(text):
+    """Return (heading, content) of the FIRST '## ' section, or (None, "").
+
+    Fallback input for repos whose STATE.md predates the ## Now/Next/Blockers
+    scaffold (Codex, chief-of-staff PR #12): by cockpit convention the first H2
+    is the "what's live right now" surface, whatever it is titled."""
+    head, out = None, []
+    for line in (text or "").splitlines():
+        if line.startswith("## "):
+            if head is not None:
+                break
+            head = line[3:].strip()
+            continue
+        if head is not None:
+            out.append(line)
+    return head, "\n".join(out).strip()
 
 
 TIER_NAMES = {  # H2 header text per tier (the descriptive suffix is optional in files)
@@ -467,6 +485,13 @@ def build_inject_context(root, cwd, source, checkpoint_text=None, today=None, au
         parts.append("### Next (ordered)\n" + nxt)
     if blk:
         parts.append("### Blockers / waiting-on\n" + blk)
+    if not (now or nxt or blk):
+        # Non-scaffold cockpit: no ## Now/Next/Blockers at all. Rather than inject an
+        # empty brain block, fall back to the first H2 section — bounded, so an
+        # unbounded cockpit can't flood the prompt.
+        head, body = first_h2_section(state)
+        if head and body:
+            parts.append("## Where we are (STATE.md → %s)\n%s" % (head, body[:3000]))
 
     if autonomous:
         # #204 bounded payload tiering: a fresh-context subagent gets the ledger's
@@ -670,15 +695,26 @@ def _git_commit(root, paths, message):
         return False
 
 
+_TAIL_WINDOW = 262144   # 256 KB — comfortably holds 40 JSONL lines, never the whole file
+
+
 def _transcript_tail(transcript_path, max_msgs=6, max_chars=1200):
-    """Extract the last few user/assistant text snippets from a JSONL transcript."""
+    """Extract the last few user/assistant text snippets from a JSONL transcript.
+
+    Bounded read (Codex, chief-of-staff PR #12): a long session's transcript grows
+    without bound, and this runs inside the 10s checkpoint hook budget — so read a
+    fixed window from EOF. A line truncated at the window edge (or a multi-byte
+    char split by it, decoded with 'replace') fails json.loads and is skipped."""
     if not transcript_path or not os.path.isfile(transcript_path):
         return ""
     try:
-        with open(transcript_path, encoding="utf-8") as f:
-            lines = f.readlines()
+        with open(transcript_path, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            f.seek(max(0, f.tell() - _TAIL_WINDOW))
+            data = f.read(_TAIL_WINDOW)
     except OSError:
         return ""
+    lines = data.decode("utf-8", "replace").splitlines()
     snippets = []
     for line in lines[-40:]:
         line = line.strip()
@@ -739,6 +775,10 @@ _DATAMARK_CLOSE = "<<<CONTINUITY_DATA_END>>>"
 _FENCE_RE = re.compile(r"`{3,}|~{3,}")
 _BANNER_RE = re.compile(r"^\s*[-=_*]{3,}\s*$")
 _ROLE_RE = re.compile(r"^\s*(?:system|assistant|human|user|developer|tool)\s*:", re.I)
+# Both envelope markers start with this prefix; a literal occurrence INSIDE wrapped
+# text (any transcript that discussed this mechanism, or a crafted one) could close
+# the envelope early / forge a second one. Same class as the fence/banner escapes.
+_SENTINEL_RE = re.compile(r"<<<(?=CONTINUITY_DATA)")
 
 
 def datamark(text):
@@ -758,6 +798,7 @@ def datamark(text):
         elif _ROLE_RE.match(line):
             line = zwsp + line           # defeats the line-start role anchor
         line = _FENCE_RE.sub(lambda m: zwsp.join(m.group(0)), line)  # break fence runs
+        line = _SENTINEL_RE.sub("<<" + zwsp + "<", line)  # break our own envelope markers
         out.append(line)
     return "%s\n%s\n%s" % (_DATAMARK_OPEN, "\n".join(out), _DATAMARK_CLOSE)
 
@@ -835,8 +876,10 @@ def _best_effort_redact(text):
         sys.stderr.write("brain-continuity: redact-scan not on PATH — persisting tail unredacted\n")
         return text
     try:
+        # 5s: comfortably under the 10s PreCompact/SessionEnd hook budget — a wedged
+        # scanner must fall through to persist-unredacted, not eat the whole capture.
         proc = subprocess.run([exe, "--redact"], input=text,
-                              capture_output=True, text=True, timeout=15)
+                              capture_output=True, text=True, timeout=5)
         if proc.stdout:            # redacted text (HIGH/MEDIUM spans replaced)
             return proc.stdout
         # empty stdout = withheld (oversize) or crash → keep original, don't blank recovery
@@ -1692,10 +1735,13 @@ def cmd_fold(args):
     passes --force once the operator confirms)."""
     root = args.root
     cont_dir = os.path.join(root, "_dispatch", "continuity")
-    root_abs = os.path.abspath(os.path.normpath(root))
+    cont_abs = os.path.abspath(os.path.normpath(cont_dir))
     cap = os.path.abspath(os.path.normpath(os.path.join(root, args.capture)))
-    if not (cap == root_abs or cap.startswith(root_abs + os.sep)):
-        sys.stderr.write("fold: capture path escapes root: %s\n" % args.capture)
+    # Must resolve UNDER the continuity dir (Codex, chief-of-staff PR #12) — a mere
+    # under-root check would let e.g. --capture STATE.md relocate an arbitrary
+    # tracked file into the ignored consumed/ dir via _move_to_consumed.
+    if not cap.startswith(cont_abs + os.sep):
+        sys.stderr.write("fold: capture must live under _dispatch/continuity/: %s\n" % args.capture)
         return 1
     basename = os.path.basename(cap)
     if not os.path.isfile(cap):
