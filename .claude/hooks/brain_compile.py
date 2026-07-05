@@ -47,7 +47,7 @@ import time
 # Repo root: this file lives at <root>/.claude/hooks/brain_compile.py
 DERIVED_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-__version__ = "3.3.2"
+__version__ = "3.3.3"
 
 TIER_EMOJI = {
     "locked": "🔒", "deferred": "⏸", "presumed": "🟡",
@@ -850,18 +850,23 @@ def _write_marker(root, reason):
 
 
 def _continuity_writable(root):
-    """PRIMARY control: refuse to persist unless _dispatch/ is verifiably gitignored.
+    """PRIMARY control: refuse to persist unless the continuity SINKS are verifiably
+    gitignored — the tail must never reach a tracked path.
 
-    Probes the trailing-slash form `_dispatch/`. `git check-ignore -q _dispatch`
-    (bare) only returns 0 once the directory exists on disk, but this gate runs
-    before the first capture creates it — so a bare probe would false-refuse the
-    very first boundary of a session. The `_dispatch/` form matches the canonical
-    ignore rule regardless of on-disk existence (verified: rc 0 for both a
-    `_dispatch/` and a bare `_dispatch` rule; rc 1 when unignored)."""
-    if not _git_ok(root, "check-ignore", "-q", "_dispatch/"):  # rc==0 iff ignored
-        sys.stderr.write("brain-continuity: _dispatch/ not gitignored — REFUSING to persist tail\n")
-        _write_marker(root, "continuity-blocked-gitignore")
-        return False
+    Probes the actual write targets (`_dispatch/continuity/` for the tail +
+    `_dispatch/CHECKPOINT.md` for the pointer), NOT the parent `_dispatch/`.
+    `git check-ignore -q` matches a path under an ignored dir regardless of on-disk
+    existence (verified: rc 0 for a nonexistent `_dispatch/continuity/<x>` under a
+    `_dispatch/` rule), so this holds for the first boundary of a session. Probing the
+    parent `_dispatch/` was too coarse — a single tracked file anywhere under it (e.g. a
+    committed `_dispatch/DEPLOY-RUNBOOK.md`) flips `check-ignore -q _dispatch/` to rc 1
+    and silently refused every capture though the sinks themselves were ignored."""
+    for sink in ("_dispatch/continuity/", "_dispatch/CHECKPOINT.md"):
+        if not _git_ok(root, "check-ignore", "-q", sink):  # rc==0 iff ignored
+            sys.stderr.write(
+                "brain-continuity: %s not gitignored — REFUSING to persist tail\n" % sink)
+            _write_marker(root, "continuity-blocked-gitignore")
+            return False
     return True
 
 
