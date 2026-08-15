@@ -47,7 +47,7 @@ import time
 # Repo root: this file lives at <root>/.claude/hooks/brain_compile.py
 DERIVED_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-__version__ = "3.3.3"
+__version__ = "3.3.4"
 
 TIER_EMOJI = {
     "locked": "🔒", "deferred": "⏸", "presumed": "🟡",
@@ -197,6 +197,23 @@ def state_section(text, header):
         if capturing:
             out.append(line)
     return "\n".join(out).strip()
+
+
+# 3.3.4: both scaffold vintages in the fleet — the current generator's
+# `<!-- FILL: ... -->` comments and older scaffolds' `<angle-bracket>` stubs
+# (which span lines, so the class deliberately admits newlines).
+_PLACEHOLDER_SPAN = re.compile(r"<[^<>]{1,400}>")
+
+
+def section_is_scaffold(body):
+    """True while a STATE.md section is still unfilled template scaffold: nothing
+    alphanumeric survives once the generator's placeholder spans and bare list
+    ordinals/bullets are removed (the scaffold's `1. <thing> (#<N>)` must not
+    survive on its ordinal digit). A filled section that merely mentions an
+    <angle-bracketed> term keeps its real text and stays injectable."""
+    residue = _PLACEHOLDER_SPAN.sub("", body)
+    residue = re.sub(r"(?m)^\s*(?:\d+[.)]|[-*+])\s*", "", residue)
+    return not re.sub(r"[^A-Za-z0-9]+", "", residue)
 
 
 def first_h2_section(text):
@@ -479,6 +496,18 @@ def build_inject_context(root, cwd, source, checkpoint_text=None, today=None, au
     now = state_section(state, "Now")
     nxt = state_section(state, "Next")
     blk = state_section(state, "Blockers")
+    # 3.3.4: an unfilled scaffold section must never ride into context under the
+    # "do not re-derive" banner — placeholder text labeled as ground truth is
+    # worse than silence. Suppress per section; if the whole cockpit is scaffold,
+    # say so honestly in one line instead of emitting template prose.
+    scaffolded = [h for h, s in (("Now", now), ("Next", nxt), ("Blockers", blk))
+                  if s and section_is_scaffold(s)]
+    if "Now" in scaffolded:
+        now = ""
+    if "Next" in scaffolded:
+        nxt = ""
+    if "Blockers" in scaffolded:
+        blk = ""
     if now:
         parts.append("## Where we are (STATE.md → Now)\n" + now)
     if nxt:
@@ -486,12 +515,18 @@ def build_inject_context(root, cwd, source, checkpoint_text=None, today=None, au
     if blk:
         parts.append("### Blockers / waiting-on\n" + blk)
     if not (now or nxt or blk):
-        # Non-scaffold cockpit: no ## Now/Next/Blockers at all. Rather than inject an
-        # empty brain block, fall back to the first H2 section — bounded, so an
-        # unbounded cockpit can't flood the prompt.
-        head, body = first_h2_section(state)
-        if head and body:
-            parts.append("## Where we are (STATE.md → %s)\n%s" % (head, body[:3000]))
+        if scaffolded:
+            parts.append(
+                "## Where we are\nSTATE.md is an unfilled scaffold — no ground "
+                "truth has been captured for this project yet. Treat project "
+                "state as unknown; do not infer it from this block.")
+        else:
+            # Non-scaffold cockpit: no ## Now/Next/Blockers at all. Rather than
+            # inject an empty brain block, fall back to the first H2 section —
+            # bounded, so an unbounded cockpit can't flood the prompt.
+            head, body = first_h2_section(state)
+            if head and body and not section_is_scaffold(body):
+                parts.append("## Where we are (STATE.md → %s)\n%s" % (head, body[:3000]))
 
     if autonomous:
         # #204 bounded payload tiering: a fresh-context subagent gets the ledger's
