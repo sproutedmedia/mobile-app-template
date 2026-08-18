@@ -47,7 +47,7 @@ import time
 # Repo root: this file lives at <root>/.claude/hooks/brain_compile.py
 DERIVED_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-__version__ = "3.3.4"
+__version__ = "3.3.5"
 
 TIER_EMOJI = {
     "locked": "🔒", "deferred": "⏸", "presumed": "🟡",
@@ -637,15 +637,27 @@ def derive_repo_slug(root):
     return None
 
 
+# 3.3.5: the entry-format comment documents `issue: #<N>`, so authors write a
+# placeholder when there is no issue ("-", "TBD", "n/a"). A bare truthiness test
+# let those through and built https://github.com/<slug>/issues/- — a dead link in
+# every session's injected cockpit, which is exactly what resolve_source's
+# docstring promises never to emit.
+_ISSUE_NUMERIC_RE = re.compile(r"\A\d+\Z")
+# Jira-style refs (PROJ-123) are real but not GitHub — surface as plain text, no link.
+_ISSUE_TRACKER_RE = re.compile(r"\A[A-Za-z][A-Za-z0-9]*-\d+\Z")
+
+
 def resolve_source(entry, repo_slug):
     """Ordered source refs for a decision (most specific first). Never raises, never a broken URL."""
     refs = []
     issue = (entry.get("issue") or "").strip().lstrip("#")
-    if issue:
+    if _ISSUE_NUMERIC_RE.match(issue):
         if repo_slug:
             refs.append("https://github.com/%s/issues/%s" % (repo_slug, issue))
         else:
             refs.append("issue #%s" % issue)
+    elif _ISSUE_TRACKER_RE.match(issue):
+        refs.append("issue %s" % issue)
     line = entry.get("line")
     if line:
         refs.append("DECISIONS.md:%d" % line)
